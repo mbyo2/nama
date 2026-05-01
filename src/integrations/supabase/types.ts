@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      certificates: {
+        Row: {
+          certificate_number: string
+          created_at: string
+          expires_at: string
+          id: string
+          issued_at: string
+          member_id: string
+          revoked: boolean
+          user_id: string
+          verification_token: string
+        }
+        Insert: {
+          certificate_number: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          issued_at?: string
+          member_id: string
+          revoked?: boolean
+          user_id: string
+          verification_token: string
+        }
+        Update: {
+          certificate_number?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          issued_at?: string
+          member_id?: string
+          revoked?: boolean
+          user_id?: string
+          verification_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       habit_logs: {
         Row: {
           created_at: string
@@ -81,6 +125,164 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      members: {
+        Row: {
+          artistic_discipline: string
+          bio: string | null
+          city: string
+          created_at: string
+          full_name: string
+          id: string
+          institution_name: string | null
+          membership_category_id: string
+          membership_expires_at: string | null
+          membership_started_at: string | null
+          nrc_number: string
+          phone_number: string
+          province: string
+          status: string
+          tpin: string | null
+          updated_at: string
+          user_id: string
+          years_experience: number
+        }
+        Insert: {
+          artistic_discipline: string
+          bio?: string | null
+          city: string
+          created_at?: string
+          full_name: string
+          id?: string
+          institution_name?: string | null
+          membership_category_id: string
+          membership_expires_at?: string | null
+          membership_started_at?: string | null
+          nrc_number: string
+          phone_number: string
+          province: string
+          status?: string
+          tpin?: string | null
+          updated_at?: string
+          user_id: string
+          years_experience?: number
+        }
+        Update: {
+          artistic_discipline?: string
+          bio?: string | null
+          city?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          institution_name?: string | null
+          membership_category_id?: string
+          membership_expires_at?: string | null
+          membership_started_at?: string | null
+          nrc_number?: string
+          phone_number?: string
+          province?: string
+          status?: string
+          tpin?: string | null
+          updated_at?: string
+          user_id?: string
+          years_experience?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "members_membership_category_id_fkey"
+            columns: ["membership_category_id"]
+            isOneToOne: false
+            referencedRelation: "membership_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      membership_categories: {
+        Row: {
+          annual_fee_zmw: number
+          created_at: string
+          description: string
+          id: string
+          name: string
+          requires_institution: boolean
+          sort_order: number
+        }
+        Insert: {
+          annual_fee_zmw: number
+          created_at?: string
+          description: string
+          id: string
+          name: string
+          requires_institution?: boolean
+          sort_order?: number
+        }
+        Update: {
+          annual_fee_zmw?: number
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          requires_institution?: boolean
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount_zmw: number
+          created_at: string
+          id: string
+          member_id: string | null
+          membership_category_id: string
+          paid_at: string | null
+          phone_number: string | null
+          provider: string
+          status: string
+          transaction_reference: string
+          user_id: string
+        }
+        Insert: {
+          amount_zmw: number
+          created_at?: string
+          id?: string
+          member_id?: string | null
+          membership_category_id: string
+          paid_at?: string | null
+          phone_number?: string | null
+          provider: string
+          status?: string
+          transaction_reference: string
+          user_id: string
+        }
+        Update: {
+          amount_zmw?: number
+          created_at?: string
+          id?: string
+          member_id?: string | null
+          membership_category_id?: string
+          paid_at?: string | null
+          phone_number?: string | null
+          provider?: string
+          status?: string
+          transaction_reference?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_membership_category_id_fkey"
+            columns: ["membership_category_id"]
+            isOneToOne: false
+            referencedRelation: "membership_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
