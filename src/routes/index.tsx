@@ -1,19 +1,18 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Infinity as InfinityIcon, Flame, CalendarDays, Moon, Bell, BarChart3, CloudUpload,
-  CheckCircle2, TrendingUp, Sparkles, ArrowRight, Star, Quote,
+  ArrowRight, ShieldCheck, Award, Users, FileText, Smartphone,
+  CheckCircle2, QrCode, Building2, GraduationCap, Star,
 } from "lucide-react";
-import heroBg from "@/assets/hero-bg.jpg";
-import shadowBg from "@/assets/shadow-bg.jpg";
-
+import heroBg from "@/assets/nama-hero.jpg";
+import { formatZmw } from "@/lib/nama";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
   head: () => ({
     meta: [
-      { title: "Continuum — Build lasting habits, one day at a time" },
-      { name: "description", content: "A calm, focused habit tracker. Track streaks, visualize progress, and build your daily ritual. Free, ad-free, distraction-free." },
+      { title: "NAMA — National Association for Media Arts" },
+      { name: "description", content: "The official membership and digital certification body for Zambian filmmakers, scriptwriters, actors, and media practitioners. Register, get certified, get recognised." },
     ],
   }),
 });
@@ -37,183 +36,205 @@ function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Hero />
-      <Features />
+      <Marquee />
+      <WhyRegister />
+      <Tiers />
       <HowItWorks />
-      <Reviews />
+      <Compliance />
       <FinalCTA />
       <Footer />
     </div>
   );
 }
 
-/* ─── Hero (dark, full-bleed, with navbar) ─── */
+/* ─── Hero ─── */
 function Hero() {
   return (
-    <>
-      <section className="relative pb-24 pt-0 lg:pb-32 lg:pt-8 xl:pb-40 xl:pt-12" style={{ background: "#050d0a" }}>
-        {/* Background image — weighted to the right */}
-        <img
-          src={heroBg}
-          alt=""
-          width={1920}
-          height={1080}
-          className="absolute inset-0 w-full h-full object-cover object-right pointer-events-none select-none"
-          aria-hidden="true"
-        />
-        {/* Left-side gradient for text legibility */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(to right, rgba(5,13,10,0.5), rgba(5,13,10,0.13), transparent)` }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(to bottom, rgba(0,0,0,0.26), transparent, rgba(5,13,10,0))` }} />
+    <section className="relative min-h-[88vh] overflow-hidden" style={{ background: "#0a0907" }}>
+      <img
+        src={heroBg}
+        alt=""
+        width={1920}
+        height={1280}
+        className="absolute inset-0 w-full h-full object-cover object-right pointer-events-none select-none"
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to right, rgba(10,9,7,0.92), rgba(10,9,7,0.55) 45%, transparent 75%)" }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to bottom, rgba(10,9,7,0.5), transparent 25%, rgba(10,9,7,0.6))" }} />
 
-        {/* Navbar */}
-        <nav className="relative z-20 max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
-            <InfinityIcon className="w-7 h-7 text-white" strokeWidth={2.5} />
-            <span className="text-xl font-semibold text-white/90 tracking-tight">Continuum</span>
-          </Link>
-
-          <div className="hidden sm:flex items-center gap-8 text-sm text-white">
-            <a href="#features" className="hover:text-white/70 transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-white/70 transition-colors">How it works</a>
-            <a href="#reviews" className="hover:text-white/70 transition-colors">Reviews</a>
+      {/* Navbar */}
+      <nav className="relative z-20 max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-sm border border-brass/60 flex items-center justify-center">
+            <span className="font-serif text-brass text-base font-bold tracking-tight">N</span>
           </div>
+          <div className="leading-tight">
+            <p className="font-serif text-white text-lg font-semibold tracking-tight">NAMA</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">Media Arts · Zambia</p>
+          </div>
+        </Link>
 
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/30 bg-white/10 text-white px-5 py-2.5 text-sm font-medium hover:bg-white/20 backdrop-blur-sm transition-all duration-200 active:scale-[0.97]"
-          >
-            Get started
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </nav>
+        <div className="hidden md:flex items-center gap-8 text-[13px] text-white/80">
+          <a href="#why" className="hover:text-white transition-colors">Why register</a>
+          <a href="#tiers" className="hover:text-white transition-colors">Membership</a>
+          <a href="#how" className="hover:text-white transition-colors">How it works</a>
+          <Link to="/verify" className="hover:text-white transition-colors">Verify certificate</Link>
+        </div>
 
-        {/* Hero content — left aligned */}
-        <div className="relative z-10 max-w-5xl mx-auto px-5 pt-24 pb-12">
-          <div className="max-w-xl">
-            <ScrollReveal delay={80}>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white text-left" style={{ lineHeight: "1.08" }}>
-                Build lasting habits,<br />one day at a time
-              </h1>
-            </ScrollReveal>
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-2 rounded-sm border border-brass/70 bg-brass/10 text-white px-5 py-2.5 text-[13px] font-medium hover:bg-brass/20 backdrop-blur-sm transition-all"
+        >
+          Member portal
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </nav>
 
-            <ScrollReveal delay={160}>
-              <p className="mt-6 text-lg text-white text-left" style={{ textWrap: "pretty", lineHeight: "1.6" }}>
-                Continuum is a calm, focused habit tracker that helps you build consistency through streaks, visual progress, and zero distractions.
-              </p>
-            </ScrollReveal>
+      {/* Hero copy */}
+      <div className="relative z-10 max-w-6xl mx-auto px-6 pt-20 pb-32 sm:pt-28">
+        <div className="max-w-2xl">
+          <p className="inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.25em] text-brass">
+            <span className="block w-8 h-px bg-brass" />
+            Established under NAC Act, Cap 170
+          </p>
 
-            <ScrollReveal delay={240}>
-              <div className="mt-10 flex flex-col sm:flex-row items-start gap-3">
-                <Link
-                  to="/login"
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#FDAA3E] text-[#1a1a1a] px-7 py-3.5 text-sm font-bold hover:bg-[#fdb95e] transition-all duration-200 active:scale-[0.97] shadow-lg shadow-[#FDAA3E]/25"
-                >
-                  Get started free
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </ScrollReveal>
+          <h1 className="mt-6 font-serif text-white text-5xl sm:text-6xl lg:text-7xl font-medium tracking-tight" style={{ lineHeight: "1.02" }}>
+            The Zambian creator's<br />
+            <em className="text-brass not-italic font-serif italic">recognised home.</em>
+          </h1>
+
+          <p className="mt-7 text-lg text-white/80 max-w-xl" style={{ lineHeight: "1.6" }}>
+            The National Association for Media Arts is Zambia's umbrella body for filmmakers, scriptwriters, actors, and media practitioners. Register, get certified, and stand in the room where your work is recognised.
+          </p>
+
+          <div className="mt-10 flex flex-col sm:flex-row gap-3">
+            <Link
+              to="/login"
+              className="inline-flex items-center justify-center gap-2 rounded-sm bg-brass text-[#0a0907] px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
+            >
+              Begin registration
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/verify"
+              className="inline-flex items-center justify-center gap-2 rounded-sm border border-white/25 bg-white/5 text-white px-7 py-4 text-sm font-medium hover:bg-white/10 backdrop-blur-sm transition-all"
+            >
+              <QrCode className="w-4 h-4" />
+              Verify a certificate
+            </Link>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+
+      {/* Bottom credentials bar */}
+      <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 backdrop-blur-sm" style={{ background: "rgba(10,9,7,0.4)" }}>
+        <div className="max-w-6xl mx-auto px-6 py-5 flex flex-wrap items-center justify-between gap-y-3 gap-x-8 text-[11px] text-white/70 uppercase tracking-[0.2em]">
+          <span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5 text-brass" /> ECT Act 2021 compliant</span>
+          <span className="flex items-center gap-2"><FileText className="w-3.5 h-3.5 text-brass" /> NAC Cap 170 registered</span>
+          <span className="flex items-center gap-2"><Smartphone className="w-3.5 h-3.5 text-brass" /> Mobile money payments</span>
+          <span className="flex items-center gap-2"><Building2 className="w-3.5 h-3.5 text-brass" /> Hosted in Zambia</span>
+        </div>
+      </div>
+    </section>
   );
 }
 
-/* ─── Features ─── */
-const features = [
-  { icon: Flame, title: "Streak tracking", desc: "Watch your momentum build day by day. Never break the chain." },
-  { icon: CalendarDays, title: "Calendar heatmap", desc: "See your consistency at a glance with a beautiful 30-day view." },
-  { icon: BarChart3, title: "Smart insights", desc: "Current streak, longest streak, completion rate — all the stats that matter." },
-  { icon: Bell, title: "Gentle reminders", desc: "Set custom reminder times so you never forget your daily rituals." },
-  { icon: Moon, title: "Dark mode", desc: "Easy on the eyes, day or night. Follows your system or your choice." },
-  { icon: CloudUpload, title: "Cloud sync", desc: "Sign in to sync your habits across devices. Your data, always safe." },
+/* ─── Marquee of disciplines ─── */
+function Marquee() {
+  const disciplines = [
+    "Filmmakers", "Scriptwriters", "Actors", "Cinematographers", "Editors",
+    "Sound designers", "Animators", "Documentarians", "Producers", "Voice artists",
+    "Media journalists", "Directors",
+  ];
+  return (
+    <section className="bg-ink text-paper border-y border-white/5 py-6 overflow-hidden">
+      <div className="flex gap-12 whitespace-nowrap animate-marquee">
+        {[...disciplines, ...disciplines].map((d, i) => (
+          <span key={i} className="font-serif italic text-2xl text-paper/40 tracking-tight">
+            {d} <span className="text-brass mx-6">·</span>
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ─── Why register ─── */
+const benefits = [
+  { icon: Award, title: "A certificate that opens doors", desc: "An advanced electronic signature certificate, legally valid under the ECT Act 2021. Producers, banks, and the NAC can verify it via QR code in seconds." },
+  { icon: Users, title: "Stand united with Zambia's industry", desc: "International investors look for coordination. NAMA is the single point of truth for credentialed Zambian media artists." },
+  { icon: ShieldCheck, title: "Your data, hosted in Zambia", desc: "Compliant with the Data Protection Act 2021. Your NRC, TPIN, and creative records never leave the country without your consent." },
+  { icon: Star, title: "Eligibility for the Ngoma Awards", desc: "Only registered, verified members are nominated for Zambia's most prestigious arts recognition." },
 ];
 
-function Features() {
+function WhyRegister() {
   return (
-    <section id="features" className="py-28 relative bg-white">
-      <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `url(${shadowBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed', opacity: 0.75 }} />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+    <section id="why" className="py-28 bg-paper">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-2xl mb-16">
+          <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass">— Why register</p>
+          <h2 className="mt-4 font-serif text-4xl sm:text-5xl text-foreground tracking-tight" style={{ lineHeight: "1.1" }}>
+            Recognition is the<br />difference between<br /><em className="not-italic italic">working</em> and being seen.
+          </h2>
+        </div>
 
-      <div className="max-w-6xl mx-auto px-5 relative">
-        <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-16">
-          {/* Left: App preview — light mode on mint bg */}
-          <div className="w-full lg:w-[420px] flex-shrink-0">
-            <div className="relative">
-              <div className="rounded-xl bg-white border border-black/[0.06] shadow-xl overflow-hidden">
-                {/* Mock browser chrome */}
-                <div className="border-b border-black/5 px-5 py-3 flex items-center gap-3 bg-gray-50/80">
-                  <div className="flex gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-black/10" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-black/10" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-black/10" />
-                  </div>
-                  <div className="flex-1" />
-                </div>
-
-                {/* Mock app content — light mode */}
-                <div className="p-6 space-y-4">
-                  <div>
-                    <p className="text-xs text-black/40">Good morning</p>
-                    <p className="text-lg font-semibold text-black/90 mt-0.5">Your daily ritual</p>
-                    <p className="text-xs text-black/40 mt-1">Tuesday, March 25 · 2 of 4 minted</p>
-                  </div>
-
-                  {/* Mock progress ring */}
-                  <div className="flex justify-center py-3">
-                    <div className="w-20 h-20 rounded-full border-[4px] border-black/[0.06] flex items-center justify-center relative">
-                      <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 80 80">
-                        <circle cx="40" cy="40" r="35" fill="none" strokeWidth="4" stroke="#FDAA3E" strokeDasharray="220" strokeDashoffset="110" strokeLinecap="round" />
-                      </svg>
-                      <span className="text-lg font-bold text-black/80">50%</span>
-                    </div>
-                  </div>
-
-                  {/* Mock habit cards */}
-                  {[
-                    { name: "Morning meditation", color: "#FDAA3E", done: true },
-                    { name: "Read 20 pages", color: "hsl(217, 91%, 60%)", done: true },
-                    { name: "Exercise 30 min", color: "hsl(25, 95%, 53%)", done: false },
-                    { name: "Journal", color: "hsl(270, 95%, 75%)", done: false },
-                  ].map((h) => (
-                    <div key={h.name} className="flex items-center gap-3 rounded-xl border border-black/[0.06] bg-black/[0.02] px-4 py-3">
-                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: h.color }} />
-                      <span className={`flex-1 text-sm ${h.done ? "line-through text-black/30" : "text-black/70"}`}>{h.name}</span>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${h.done ? "bg-primary border-primary" : "border-black/15"}`}>
-                        {h.done && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <div className="grid sm:grid-cols-2 gap-px bg-border">
+          {benefits.map((b) => (
+            <div key={b.title} className="bg-paper p-8 hover:bg-card transition-colors">
+              <b.icon className="w-6 h-6 text-brass mb-5" strokeWidth={1.5} />
+              <h3 className="font-serif text-xl text-foreground mb-2">{b.title}</h3>
+              <p className="text-[14px] text-muted-foreground leading-relaxed">{b.desc}</p>
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-          {/* Right: Features content */}
-          <div className="flex-1">
-            <ScrollReveal>
-              <div className="mb-10">
-                <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Features</p>
-                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" style={{ lineHeight: "1.15" }}>
-                  Everything you need,<br />nothing you don't
-                </h2>
+/* ─── Membership tiers ─── */
+const tiers = [
+  { id: "student", name: "Student", fee: 100, eligibility: "Enrolled in accredited media studies", icon: GraduationCap },
+  { id: "bronze", name: "Bronze", fee: 200, eligibility: "Practitioners with < 5 years experience", icon: null },
+  { id: "silver", name: "Silver", fee: 300, eligibility: "Practitioners with 5–9 years experience", icon: null },
+  { id: "gold", name: "Gold", fee: 500, eligibility: "Practitioners with 10+ years experience", icon: Award, featured: true },
+  { id: "institutional", name: "Institutional", fee: 2000, eligibility: "Registered media houses & production companies", icon: Building2 },
+  { id: "associate", name: "Associate", fee: 1000, eligibility: "Non-media organisations sharing arts values", icon: null },
+];
+
+function Tiers() {
+  return (
+    <section id="tiers" className="py-28 bg-ink text-paper">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div className="max-w-xl">
+            <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass">— Membership tiers</p>
+            <h2 className="mt-4 font-serif text-4xl sm:text-5xl tracking-tight" style={{ lineHeight: "1.1" }}>
+              Annual membership,<br /><em className="italic">no hidden costs.</em>
+            </h2>
+          </div>
+          <p className="text-paper/70 max-w-sm text-[14px] leading-relaxed">
+            Fees support NAMA's affiliation with the National Arts Council, certificate issuance, and sector advocacy. Pay in Zambian Kwacha via mobile money.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/10">
+          {tiers.map((t) => (
+            <div
+              key={t.id}
+              className={`p-7 transition-colors ${t.featured ? "bg-brass text-ink" : "bg-ink hover:bg-[#13110d]"}`}
+            >
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <p className={`text-[11px] uppercase tracking-[0.2em] mb-2 ${t.featured ? "text-ink/70" : "text-brass"}`}>{t.name}</p>
+                  <p className="font-serif text-4xl font-medium">{formatZmw(t.fee)}</p>
+                  <p className={`text-[11px] mt-1 ${t.featured ? "text-ink/60" : "text-paper/50"}`}>per year</p>
+                </div>
+                {t.icon && <t.icon className={`w-5 h-5 ${t.featured ? "text-ink" : "text-brass"}`} strokeWidth={1.5} />}
               </div>
-            </ScrollReveal>
-
-            <div className="grid sm:grid-cols-2 gap-5">
-              {features.map((f, i) => (
-                <ScrollReveal key={f.title} delay={i * 70}>
-                  <div className="group rounded-2xl border border-black/[0.04] bg-black/[0.03] p-5 hover:bg-black/[0.05] hover:border-black/[0.08] transition-all duration-300">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-300">
-                      <f.icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <h3 className="font-semibold text-foreground mb-1">{f.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-                  </div>
-                </ScrollReveal>
-              ))}
+              <p className={`text-[13px] leading-relaxed ${t.featured ? "text-ink/80" : "text-paper/70"}`}>{t.eligibility}</p>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
@@ -222,38 +243,31 @@ function Features() {
 
 /* ─── How it works ─── */
 const steps = [
-  { num: "1", icon: CheckCircle2, title: "Create your habits", desc: "Add the habits you want to build — daily, specific days, or a weekly goal." },
-  { num: "2", icon: Sparkles, title: "Tap to complete", desc: "One tap each day to log your progress. Quick, satisfying, done." },
-  { num: "3", icon: TrendingUp, title: "Watch your growth", desc: "See streaks grow, heatmaps fill in, and your consistency compound over time." },
+  { num: "01", title: "Verify your identity", desc: "Submit your NRC and TPIN. We validate against Zambian formats and link your record to your legal identity." },
+  { num: "02", title: "Choose your tier and pay", desc: "Pick the membership category that matches your experience. Pay annual fees via MTN MoMo, Airtel Money, or Zamtel Kwacha." },
+  { num: "03", title: "Receive your certificate", desc: "An electronically signed PDF certificate with a unique QR code, issued the moment your payment confirms — verifiable for life." },
 ];
 
 function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-28 bg-white border-y border-border/30">
-      <div className="max-w-4xl mx-auto px-5">
-        <ScrollReveal>
-          <div className="text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">How it works</p>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" style={{ lineHeight: "1.15" }}>
-              Three steps to a better routine
-            </h2>
-          </div>
-        </ScrollReveal>
+    <section id="how" className="py-28 bg-paper">
+      <div className="max-w-5xl mx-auto px-6">
+        <div className="mb-16">
+          <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass">— How it works</p>
+          <h2 className="mt-4 font-serif text-4xl sm:text-5xl text-foreground tracking-tight max-w-2xl" style={{ lineHeight: "1.1" }}>
+            From application to<br />certificate in <em className="italic">minutes.</em>
+          </h2>
+        </div>
 
-        <div className="relative grid md:grid-cols-3 gap-8">
-          {/* Connecting line between steps (desktop only) */}
-          <div className="hidden md:block absolute top-7 left-[calc(16.67%+28px)] right-[calc(16.67%+28px)] h-px border-t-2 border-dashed border-primary/20" />
-
-          {steps.map((s, i) => (
-            <ScrollReveal key={s.num} delay={i * 100}>
-              <div className="text-center relative">
-                <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-5 text-lg font-bold shadow-lg shadow-primary/15">
-                  {s.num}
-                </div>
-                <h3 className="font-semibold text-foreground text-lg mb-2">{s.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">{s.desc}</p>
+        <div className="space-y-px bg-border">
+          {steps.map((s) => (
+            <div key={s.num} className="bg-paper p-8 grid grid-cols-12 gap-6 items-start hover:bg-card transition-colors">
+              <p className="col-span-2 sm:col-span-1 font-serif text-3xl text-brass">{s.num}</p>
+              <div className="col-span-10 sm:col-span-4">
+                <h3 className="font-serif text-2xl text-foreground">{s.title}</h3>
               </div>
-            </ScrollReveal>
+              <p className="col-span-12 sm:col-span-7 text-[14px] text-muted-foreground leading-relaxed">{s.desc}</p>
+            </div>
           ))}
         </div>
       </div>
@@ -261,49 +275,27 @@ function HowItWorks() {
   );
 }
 
-/* ─── Reviews ─── */
-const reviews = [
-  { name: "Daniel Cooper", role: "Product designer", avatar: "https://trovdwfeqyzlxzrtfbjv.supabase.co/storage/v1/object/public/assets/avatars/e20b66f6-e7e9-4c00-93d3-506c78cb66c2/avatar-19.jpg", quote: "Finally a habit app that doesn't try to be a social network. Just me and my habits.", rating: 5 },
-  { name: "Emma Lindström", role: "Software engineer", avatar: "https://trovdwfeqyzlxzrtfbjv.supabase.co/storage/v1/object/public/assets/avatars/307e7512-1637-4ea2-a5cd-875afeb1002b/avatar-21.jpg", quote: "The streak tracking is addictive in the best way. I've been consistent for 47 days now.", rating: 5 },
-  { name: "Ryan Mitchell", role: "Grad student", avatar: "https://trovdwfeqyzlxzrtfbjv.supabase.co/storage/v1/object/public/assets/avatars/6b77ccde-dbfd-4c23-8c9f-ce748683068a/avatar-16.jpg", quote: "Love the heatmap. Seeing my progress visually keeps me motivated more than any badge system.", rating: 5 },
-  { name: "Mei Lin", role: "Freelance writer", avatar: "https://trovdwfeqyzlxzrtfbjv.supabase.co/storage/v1/object/public/assets/avatars/b706d9a7-3a45-4fdd-ab47-c7023d4d0cfa/avatar-20.jpg", quote: "Simple, clean, no ads. This is what every habit tracker should be. Dark mode is gorgeous too.", rating: 5 },
-];
-
-function Reviews() {
+/* ─── Compliance / trust strip ─── */
+function Compliance() {
+  const items = [
+    { label: "NAC Act Cap 170", desc: "Registered national association" },
+    { label: "ECT Act 2021", desc: "Advanced electronic signatures" },
+    { label: "Data Protection Act 2021", desc: "Privacy by design, hosted locally" },
+    { label: "ZRA Smart Invoice", desc: "Fiscalised payment receipts" },
+  ];
   return (
-    <section id="reviews" className="py-28">
-      <div className="max-w-5xl mx-auto px-5">
-        <ScrollReveal>
-          <div className="text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Reviews</p>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground" style={{ lineHeight: "1.15" }}>
-              Loved by habit builders
-            </h2>
-          </div>
-        </ScrollReveal>
-
-        <div className="grid sm:grid-cols-2 gap-5">
-          {reviews.map((r, i) => (
-            <ScrollReveal key={r.name} delay={i * 80}>
-              <div className="relative rounded-2xl border border-border/50 bg-card p-6 overflow-hidden">
-                {/* Decorative quote mark */}
-                <Quote className="absolute top-4 right-4 w-10 h-10 text-primary/[0.06] rotate-180" />
-
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: r.rating }).map((_, j) => (
-                    <Star key={j} className="w-4 h-4 fill-primary text-primary" />
-                  ))}
-                </div>
-                <p className="text-sm text-foreground leading-relaxed mb-5 relative">"{r.quote}"</p>
-                <div className="flex items-center gap-3">
-                  <img src={r.avatar} alt={r.name} className="w-[4.5rem] h-[4.5rem] rounded-full object-cover" loading="lazy" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{r.name}</p>
-                    <p className="text-xs text-muted-foreground">{r.role}</p>
-                  </div>
-                </div>
+    <section className="py-20 bg-card border-y border-border">
+      <div className="max-w-6xl mx-auto px-6">
+        <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass mb-8">— Built on Zambian law</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border">
+          {items.map((it) => (
+            <div key={it.label} className="bg-card p-6">
+              <div className="flex items-center gap-2 mb-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-brass" />
+                <p className="font-serif text-base text-foreground font-medium">{it.label}</p>
               </div>
-            </ScrollReveal>
+              <p className="text-[12px] text-muted-foreground">{it.desc}</p>
+            </div>
           ))}
         </div>
       </div>
@@ -314,35 +306,26 @@ function Reviews() {
 /* ─── Final CTA ─── */
 function FinalCTA() {
   return (
-    <section className="relative overflow-hidden py-28" style={{ background: "#050d0a" }}>
-      {/* Reuse hero bg for visual cohesion */}
-      <img
-        src={heroBg}
-        alt=""
-        width={1920}
-        height={1080}
-        loading="lazy"
-        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none select-none"
-        aria-hidden="true"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050d0a] via-transparent to-[#050d0a] pointer-events-none" />
-
-      <div className="relative z-10 max-w-2xl mx-auto px-5 text-center">
-        <ScrollReveal>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white" style={{ lineHeight: "1.15" }}>
-            Ready to build better habits?
-          </h2>
-          <p className="mt-4 text-white max-w-md mx-auto" style={{ textWrap: "pretty" }}>
-            Join thousands of people using Continuum to build consistency, one day at a time.
-          </p>
-          <Link
-            to="/login"
-            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#FDAA3E] text-[#1a1a1a] px-8 py-4 text-sm font-semibold hover:bg-[#fdb95e] transition-all duration-200 active:scale-[0.97] shadow-lg shadow-[#FDAA3E]/25"
-          >
-            Get started free
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </ScrollReveal>
+    <section className="relative overflow-hidden py-32 bg-ink text-paper">
+      <div className="absolute inset-0 opacity-30 pointer-events-none">
+        <img src={heroBg} alt="" width={1920} height={1280} loading="lazy" className="w-full h-full object-cover" aria-hidden="true" />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/40 pointer-events-none" />
+      <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
+        <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass">— Take your seat</p>
+        <h2 className="mt-5 font-serif text-4xl sm:text-6xl tracking-tight" style={{ lineHeight: "1.05" }}>
+          Every Zambian creator<br /><em className="italic">deserves a record.</em>
+        </h2>
+        <p className="mt-6 text-paper/70 max-w-md mx-auto">
+          Register today and join the national directory of professionalised media artists.
+        </p>
+        <Link
+          to="/login"
+          className="mt-10 inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-8 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
+        >
+          Begin registration
+          <ArrowRight className="w-4 h-4" />
+        </Link>
       </div>
     </section>
   );
@@ -351,30 +334,50 @@ function FinalCTA() {
 /* ─── Footer ─── */
 function Footer() {
   return (
-    <footer className="border-t border-border/40 py-12">
-      <div className="max-w-5xl mx-auto px-5">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <InfinityIcon className="w-6 h-6 text-foreground" strokeWidth={2.5} />
-            <span className="font-semibold text-foreground text-sm">Continuum</span>
+    <footer className="bg-ink text-paper/70 py-16 border-t border-white/5">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-sm border border-brass/60 flex items-center justify-center">
+                <span className="font-serif text-brass text-base font-bold">N</span>
+              </div>
+              <p className="font-serif text-paper text-lg">NAMA</p>
+            </div>
+            <p className="text-[12px] leading-relaxed">
+              The National Association for Media Arts — affiliated to the National Arts Council of Zambia under NAC Act, Cap 170.
+            </p>
           </div>
-
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-foreground transition-colors">How it works</a>
-            <a href="#reviews" className="hover:text-foreground transition-colors">Reviews</a>
-            <Link to="/login" className="hover:text-foreground transition-colors">Sign in</Link>
-            <Link to="/login" className="hover:text-foreground transition-colors">Get started</Link>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-brass mb-4">Members</p>
+            <ul className="space-y-2 text-[13px]">
+              <li><Link to="/login" className="hover:text-paper transition-colors">Sign in</Link></li>
+              <li><Link to="/login" className="hover:text-paper transition-colors">Register</Link></li>
+              <li><Link to="/verify" className="hover:text-paper transition-colors">Verify certificate</Link></li>
+            </ul>
           </div>
-
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Continuum</p>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-brass mb-4">Information</p>
+            <ul className="space-y-2 text-[13px]">
+              <li><a href="#tiers" className="hover:text-paper transition-colors">Membership tiers</a></li>
+              <li><a href="#how" className="hover:text-paper transition-colors">How it works</a></li>
+              <li><a href="#why" className="hover:text-paper transition-colors">Why register</a></li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-brass mb-4">Compliance</p>
+            <ul className="space-y-2 text-[13px]">
+              <li>NAC Act, Cap 170</li>
+              <li>ECT Act, 2021</li>
+              <li>Data Protection Act, 2021</li>
+            </ul>
+          </div>
+        </div>
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between gap-3 text-[12px]">
+          <p>© {new Date().getFullYear()} National Association for Media Arts, Zambia.</p>
+          <p>Lusaka · Zambia</p>
         </div>
       </div>
     </footer>
   );
-}
-
-/* ─── Scroll reveal wrapper (animations removed) ─── */
-function ScrollReveal({ children }: { children: React.ReactNode; delay?: number }) {
-  return <>{children}</>;
 }
