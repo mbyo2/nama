@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Infinity as InfinityIcon, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import shadowBg from "@/assets/shadow-bg.jpg";
 
 async function getSupabase() {
   const { supabase } = await import("@/integrations/supabase/client");
@@ -72,25 +71,30 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-5 relative bg-white">
-      {/* Shadow background */}
-      <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `url(${shadowBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed', opacity: 0.75 }} />
-
+    <div className="min-h-screen flex items-center justify-center px-5 relative bg-paper">
       <div className="max-w-sm w-full animate-fade-up-blur relative z-10">
         {/* Logo — links home */}
-        <Link to="/" className="flex items-center justify-center gap-2.5 mb-8 hover:opacity-80 transition-opacity">
-          <InfinityIcon className="w-7 h-7 text-foreground" strokeWidth={2.5} />
-          <span className="text-xl font-semibold text-foreground tracking-tight">Continuum</span>
+        <Link to="/" className="flex items-center justify-center gap-3 mb-8 hover:opacity-80 transition-opacity">
+          <div className="w-9 h-9 rounded-sm border border-brass/60 flex items-center justify-center">
+            <span className="font-serif text-brass text-base font-bold">N</span>
+          </div>
+          <div className="leading-tight text-left">
+            <p className="font-serif text-foreground text-lg font-semibold tracking-tight">NAMA</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Media Arts · Zambia</p>
+          </div>
         </Link>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl shadow-black/[0.06] border border-border/50 p-8">
+        <div className="bg-card rounded-sm shadow-xl shadow-black/[0.06] border border-border p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight" style={{ lineHeight: "1.2" }}>
+            <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass mb-3">
+              {isSignUp ? "— Begin registration" : "— Member portal"}
+            </p>
+            <h1 className="font-serif text-3xl text-foreground tracking-tight" style={{ lineHeight: "1.15" }}>
               {isSignUp ? "Create your account" : "Welcome back"}
             </h1>
-            <p className="text-sm text-muted-foreground mt-1.5">
-              {isSignUp ? "Start building lasting habits" : "Continue your daily ritual"}
+            <p className="text-sm text-muted-foreground mt-2">
+              {isSignUp ? "Take the first step toward certification" : "Continue to your member dashboard"}
             </p>
           </div>
 
@@ -152,9 +156,9 @@ function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-[#FDAA3E] text-[#1a1a1a] py-3.5 text-sm font-bold hover:bg-[#fdb95e] transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none shadow-lg shadow-[#FDAA3E]/20"
+            className="w-full rounded-sm bg-brass text-ink py-3.5 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
           >
-            {loading ? "Please wait..." : isSignUp ? "Sign up" : "Sign in"}
+            {loading ? "Please wait..." : isSignUp ? "Create account" : "Sign in"}
           </button>
         </form>
 
