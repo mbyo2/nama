@@ -30,7 +30,7 @@ interface VerifyResult {
 
 function VerifyPage() {
   const { token: initialToken } = Route.useSearch();
-  const [token, setToken] = useState(initialToken);
+  const [token, setToken] = useState(initialToken ?? "");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifyResult | null>(null);
   const [error, setError] = useState<string | null>(null);
