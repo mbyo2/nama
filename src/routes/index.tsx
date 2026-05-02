@@ -42,9 +42,13 @@ function LandingPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Hero />
       <Marquee />
+      <MissionVision />
       <WhyRegister />
       <Tiers />
       <HowItWorks />
+      <Team />
+      <Blog />
+      <Events />
       <Compliance />
       <FinalCTA />
       <Footer />
