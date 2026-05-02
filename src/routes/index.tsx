@@ -2,10 +2,15 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ArrowRight, ShieldCheck, Award, Users, FileText, Smartphone,
-  CheckCircle2, QrCode, Building2, GraduationCap, Star,
+  CheckCircle2, QrCode, Building2, GraduationCap, Star, Phone, Facebook,
+  Calendar, MapPin, Mail, Target, Eye,
 } from "lucide-react";
 import heroBg from "@/assets/nama-hero.jpg";
 import { formatZmw } from "@/lib/nama";
+import {
+  NATIONAL_EXECUTIVE, BLOG_POSTS, UPCOMING_EVENT,
+  NAMA_MISSION, NAMA_VISION, NAMA_CONTACT_EMAIL,
+} from "@/lib/nama-content";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
