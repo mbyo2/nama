@@ -15,6 +15,9 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRegisterRouteImport } from './routes/app.register'
+import { Route as AppPayRouteImport } from './routes/app.pay'
+import { Route as AppCertificateRouteImport } from './routes/app.certificate'
 
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
@@ -46,37 +49,79 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRegisterRoute = AppRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPayRoute = AppPayRouteImport.update({
+  id: '/pay',
+  path: '/pay',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCertificateRoute = AppCertificateRouteImport.update({
+  id: '/certificate',
+  path: '/certificate',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
   '/settings': typeof SettingsRoute
   '/verify': typeof VerifyRoute
+  '/app/certificate': typeof AppCertificateRoute
+  '/app/pay': typeof AppPayRoute
+  '/app/register': typeof AppRegisterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
   '/settings': typeof SettingsRoute
   '/verify': typeof VerifyRoute
+  '/app/certificate': typeof AppCertificateRoute
+  '/app/pay': typeof AppPayRoute
+  '/app/register': typeof AppRegisterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
   '/settings': typeof SettingsRoute
   '/verify': typeof VerifyRoute
+  '/app/certificate': typeof AppCertificateRoute
+  '/app/pay': typeof AppPayRoute
+  '/app/register': typeof AppRegisterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/insights' | '/login' | '/settings' | '/verify'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/insights'
+    | '/login'
+    | '/settings'
+    | '/verify'
+    | '/app/certificate'
+    | '/app/pay'
+    | '/app/register'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/insights' | '/login' | '/settings' | '/verify'
+  to:
+    | '/'
+    | '/app'
+    | '/insights'
+    | '/login'
+    | '/settings'
+    | '/verify'
+    | '/app/certificate'
+    | '/app/pay'
+    | '/app/register'
   id:
     | '__root__'
     | '/'
@@ -85,11 +130,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/settings'
     | '/verify'
+    | '/app/certificate'
+    | '/app/pay'
+    | '/app/register'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRoute
+  AppRoute: typeof AppRouteWithChildren
   InsightsRoute: typeof InsightsRoute
   LoginRoute: typeof LoginRoute
   SettingsRoute: typeof SettingsRoute
@@ -140,12 +188,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/register': {
+      id: '/app/register'
+      path: '/register'
+      fullPath: '/app/register'
+      preLoaderRoute: typeof AppRegisterRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/pay': {
+      id: '/app/pay'
+      path: '/pay'
+      fullPath: '/app/pay'
+      preLoaderRoute: typeof AppPayRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/certificate': {
+      id: '/app/certificate'
+      path: '/certificate'
+      fullPath: '/app/certificate'
+      preLoaderRoute: typeof AppCertificateRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppCertificateRoute: typeof AppCertificateRoute
+  AppPayRoute: typeof AppPayRoute
+  AppRegisterRoute: typeof AppRegisterRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppCertificateRoute: AppCertificateRoute,
+  AppPayRoute: AppPayRoute,
+  AppRegisterRoute: AppRegisterRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRoute,
+  AppRoute: AppRouteWithChildren,
   InsightsRoute: InsightsRoute,
   LoginRoute: LoginRoute,
   SettingsRoute: SettingsRoute,

@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/verify")({
   component: VerifyPage,
-  validateSearch: (search: Record<string, unknown>) => ({
-    token: typeof search.token === "string" ? search.token : "",
+  validateSearch: (search: Record<string, unknown>): { token?: string } => ({
+    token: typeof search.token === "string" ? search.token : undefined,
   }),
   head: () => ({
     meta: [
