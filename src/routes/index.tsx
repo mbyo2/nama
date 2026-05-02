@@ -84,10 +84,11 @@ function Hero() {
         </Link>
 
         <div className="hidden md:flex items-center gap-8 text-[13px] text-white/80">
-          <a href="#why" className="hover:text-white transition-colors">Why register</a>
+          <a href="#about" className="hover:text-white transition-colors">About</a>
           <a href="#tiers" className="hover:text-white transition-colors">Membership</a>
-          <a href="#how" className="hover:text-white transition-colors">How it works</a>
-          <Link to="/verify" className="hover:text-white transition-colors">Verify certificate</Link>
+          <a href="#team" className="hover:text-white transition-colors">Team</a>
+          <a href="#blog" className="hover:text-white transition-colors">Insights</a>
+          <Link to="/verify" className="hover:text-white transition-colors">Verify</Link>
         </div>
 
         <Link
