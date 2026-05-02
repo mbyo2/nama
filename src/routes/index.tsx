@@ -553,19 +553,26 @@ function Footer() {
             </ul>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-brass mb-4">Information</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-brass mb-4">Explore</p>
             <ul className="space-y-2 text-[13px]">
-              <li><a href="#tiers" className="hover:text-paper transition-colors">Membership tiers</a></li>
-              <li><a href="#how" className="hover:text-paper transition-colors">How it works</a></li>
-              <li><a href="#why" className="hover:text-paper transition-colors">Why register</a></li>
+              <li><a href="#about" className="hover:text-paper transition-colors">About NAMA</a></li>
+              <li><a href="#team" className="hover:text-paper transition-colors">Team</a></li>
+              <li><a href="#blog" className="hover:text-paper transition-colors">Insights</a></li>
+              <li><a href="#events" className="hover:text-paper transition-colors">Events</a></li>
             </ul>
           </div>
           <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-brass mb-4">Compliance</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-brass mb-4">Contact</p>
             <ul className="space-y-2 text-[13px]">
-              <li>NAC Act, Cap 170</li>
-              <li>ECT Act, 2021</li>
-              <li>Data Protection Act, 2021</li>
+              <li>
+                <a href={`mailto:${NAMA_CONTACT_EMAIL}`} className="inline-flex items-center gap-2 hover:text-paper transition-colors">
+                  <Mail className="w-3.5 h-3.5" />
+                  {NAMA_CONTACT_EMAIL}
+                </a>
+              </li>
+              <li className="pt-2 text-paper/50">Lusaka, Zambia</li>
+              <li className="pt-3 text-[11px] uppercase tracking-[0.2em] text-paper/50">Compliance</li>
+              <li>NAC Act, Cap 170 · ECT Act, 2021</li>
             </ul>
           </div>
         </div>
