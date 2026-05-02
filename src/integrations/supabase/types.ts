@@ -310,7 +310,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      verify_certificate: {
+        Args: { _token: string }
+        Returns: {
+          artistic_discipline: string
+          certificate_number: string
+          expires_at: string
+          full_name: string
+          issued_at: string
+          membership_category_id: string
+          province: string
+          revoked: boolean
+          status: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
