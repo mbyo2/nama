@@ -341,6 +341,192 @@ function FinalCTA() {
   );
 }
 
+/* ─── Mission / Vision ─── */
+function MissionVision() {
+  return (
+    <section id="about" className="py-28 bg-paper border-b border-border">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-2xl mb-16">
+          <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass">— About NAMA</p>
+          <h2 className="mt-4 font-serif text-4xl sm:text-5xl text-foreground tracking-tight" style={{ lineHeight: "1.1" }}>
+            One association, <em className="not-italic italic">ten provinces,</em><br />a single industry voice.
+          </h2>
+          <p className="mt-6 text-[15px] text-muted-foreground leading-relaxed max-w-xl">
+            The National Association of Media Arts unites practitioners across Zambia's ten provinces — mandated to foster professionalism, industry formalization, capacity building, content creation, and stakeholder collaboration.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-px bg-border">
+          <div className="bg-paper p-10">
+            <Target className="w-6 h-6 text-brass mb-5" strokeWidth={1.5} />
+            <p className="text-[11px] uppercase tracking-[0.25em] text-brass mb-3">Mission</p>
+            <p className="font-serif text-2xl text-foreground leading-snug">{NAMA_MISSION}</p>
+          </div>
+          <div className="bg-paper p-10">
+            <Eye className="w-6 h-6 text-brass mb-5" strokeWidth={1.5} />
+            <p className="text-[11px] uppercase tracking-[0.25em] text-brass mb-3">Vision</p>
+            <p className="font-serif text-2xl text-foreground leading-snug">{NAMA_VISION}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Team ─── */
+function Team() {
+  return (
+    <section id="team" className="py-28 bg-paper">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div className="max-w-xl">
+            <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass">— Team NAMA</p>
+            <h2 className="mt-4 font-serif text-4xl sm:text-5xl text-foreground tracking-tight" style={{ lineHeight: "1.1" }}>
+              Dedication. Expertise.<br /><em className="italic">Passion.</em>
+            </h2>
+          </div>
+          <p className="text-muted-foreground max-w-sm text-[14px] leading-relaxed">
+            NAMA's national executive — self-driven leaders committed to cooperation, communication, and collaboration for Zambia's media arts sector.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-border">
+          {NATIONAL_EXECUTIVE.map((m) => (
+            <div key={m.name} className="bg-paper group">
+              <div className="aspect-square overflow-hidden bg-muted">
+                <img
+                  src={m.image}
+                  alt={`${m.name}, ${m.role} of NAMA`}
+                  loading="lazy"
+                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                />
+              </div>
+              <div className="p-5">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-1.5">{m.role}</p>
+                <p className="font-serif text-lg text-foreground leading-tight">{m.name}</p>
+                <div className="mt-3 flex items-center gap-3 text-[11px] text-muted-foreground">
+                  <a href={`tel:${m.phone.replace(/\s+/g, "")}`} className="flex items-center gap-1.5 hover:text-foreground transition-colors">
+                    <Phone className="w-3 h-3" />
+                    <span>{m.phone}</span>
+                  </a>
+                  {m.facebook && (
+                    <a href={m.facebook} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-brass transition-colors">
+                      <Facebook className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Blog ─── */
+function Blog() {
+  return (
+    <section id="blog" className="py-28 bg-ink text-paper">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div className="max-w-xl">
+            <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass">— Stay ahead</p>
+            <h2 className="mt-4 font-serif text-4xl sm:text-5xl tracking-tight" style={{ lineHeight: "1.1" }}>
+              Latest <em className="italic">insights</em><br />from the sector.
+            </h2>
+          </div>
+          <p className="text-paper/70 max-w-sm text-[14px] leading-relaxed">
+            Reporting, opinion, and field notes from NAMA members across Zambia's ten provinces.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/10">
+          {BLOG_POSTS.map((p) => (
+            <a
+              key={p.url}
+              href={p.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-ink hover:bg-[#13110d] transition-colors group flex flex-col"
+            >
+              <div className="aspect-[4/3] overflow-hidden">
+                <img
+                  src={p.image}
+                  alt={p.title}
+                  loading="lazy"
+                  className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+                />
+              </div>
+              <div className="p-6 flex-1 flex flex-col">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-3">By {p.author}</p>
+                <h3 className="font-serif text-xl text-paper leading-snug mb-3 group-hover:text-brass transition-colors">
+                  {p.title}
+                </h3>
+                <p className="text-[13px] text-paper/60 leading-relaxed line-clamp-3">{p.excerpt}</p>
+                <p className="mt-5 text-[12px] text-brass inline-flex items-center gap-1.5">
+                  Read article <ArrowRight className="w-3 h-3" />
+                </p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Events ─── */
+function Events() {
+  return (
+    <section id="events" className="py-28 bg-paper border-t border-border">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="mb-12">
+          <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass">— Upcoming events</p>
+          <h2 className="mt-4 font-serif text-4xl sm:text-5xl text-foreground tracking-tight max-w-2xl" style={{ lineHeight: "1.1" }}>
+            Where the <em className="italic">industry</em> gathers.
+          </h2>
+        </div>
+
+        <a
+          href={UPCOMING_EVENT.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="grid lg:grid-cols-5 gap-px bg-border group hover:bg-brass/30 transition-colors"
+        >
+          <div className="lg:col-span-2 aspect-[4/5] sm:aspect-[16/10] lg:aspect-auto overflow-hidden bg-muted">
+            <img
+              src={UPCOMING_EVENT.image}
+              alt={UPCOMING_EVENT.title}
+              loading="lazy"
+              className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700"
+            />
+          </div>
+          <div className="lg:col-span-3 bg-paper p-10 sm:p-14 flex flex-col justify-center">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-brass mb-4">Featured event</p>
+            <h3 className="font-serif text-3xl sm:text-4xl text-foreground tracking-tight leading-tight mb-6">
+              {UPCOMING_EVENT.title}
+            </h3>
+            <div className="space-y-2.5 text-[14px] text-muted-foreground">
+              <p className="flex items-center gap-2.5">
+                <Calendar className="w-4 h-4 text-brass" />
+                {UPCOMING_EVENT.date}
+              </p>
+              <p className="flex items-center gap-2.5">
+                <MapPin className="w-4 h-4 text-brass" />
+                {UPCOMING_EVENT.location}
+              </p>
+            </div>
+            <p className="mt-8 inline-flex items-center gap-2 text-sm text-foreground font-medium">
+              View event details <ArrowRight className="w-4 h-4 text-brass" />
+            </p>
+          </div>
+        </a>
+      </div>
+    </section>
+  );
+}
+
 /* ─── Footer ─── */
 function Footer() {
   return (
