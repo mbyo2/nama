@@ -10,9 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyRouteImport } from './routes/verify'
-import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRegisterRouteImport } from './routes/app.register'
@@ -24,19 +22,9 @@ const VerifyRoute = VerifyRouteImport.update({
   path: '/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InsightsRoute = InsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -68,9 +56,7 @@ const AppCertificateRoute = AppCertificateRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
-  '/settings': typeof SettingsRoute
   '/verify': typeof VerifyRoute
   '/app/certificate': typeof AppCertificateRoute
   '/app/pay': typeof AppPayRoute
@@ -79,9 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
-  '/settings': typeof SettingsRoute
   '/verify': typeof VerifyRoute
   '/app/certificate': typeof AppCertificateRoute
   '/app/pay': typeof AppPayRoute
@@ -91,9 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/insights': typeof InsightsRoute
   '/login': typeof LoginRoute
-  '/settings': typeof SettingsRoute
   '/verify': typeof VerifyRoute
   '/app/certificate': typeof AppCertificateRoute
   '/app/pay': typeof AppPayRoute
@@ -104,9 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
-    | '/insights'
     | '/login'
-    | '/settings'
     | '/verify'
     | '/app/certificate'
     | '/app/pay'
@@ -115,9 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/app'
-    | '/insights'
     | '/login'
-    | '/settings'
     | '/verify'
     | '/app/certificate'
     | '/app/pay'
@@ -126,9 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
-    | '/insights'
     | '/login'
-    | '/settings'
     | '/verify'
     | '/app/certificate'
     | '/app/pay'
@@ -138,9 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
-  InsightsRoute: typeof InsightsRoute
   LoginRoute: typeof LoginRoute
-  SettingsRoute: typeof SettingsRoute
   VerifyRoute: typeof VerifyRoute
 }
 
@@ -153,25 +127,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/insights': {
-      id: '/insights'
-      path: '/insights'
-      fullPath: '/insights'
-      preLoaderRoute: typeof InsightsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -229,9 +189,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
-  InsightsRoute: InsightsRoute,
   LoginRoute: LoginRoute,
-  SettingsRoute: SettingsRoute,
   VerifyRoute: VerifyRoute,
 }
 export const routeTree = rootRouteImport
