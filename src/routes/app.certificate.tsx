@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Download, ShieldCheck, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import namaLogo from "@/assets/nama-logo.jpg";
 import {
   fetchMyMember, fetchMyCertificate, fetchCategories,
 } from "@/lib/nama-api";
@@ -98,9 +99,7 @@ function CertificatePage() {
             {/* Top */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-sm border border-brass/60 flex items-center justify-center">
-                  <span className="font-serif text-brass text-lg font-bold">N</span>
-                </div>
+                <img src={namaLogo} alt="NAMA logo" className="w-12 h-12 rounded-full object-cover" />
                 <div>
                   <p className="font-serif text-foreground text-lg font-semibold">NAMA</p>
                   <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
