@@ -6,6 +6,7 @@ import {
   Calendar, MapPin, Mail, Target, Eye,
 } from "lucide-react";
 import heroBg from "@/assets/nama-hero.jpg";
+import namaLogo from "@/assets/nama-logo.jpg";
 import { formatZmw } from "@/lib/nama";
 import {
   NATIONAL_EXECUTIVE, BLOG_POSTS, UPCOMING_EVENT,
