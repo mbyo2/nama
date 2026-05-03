@@ -88,6 +88,7 @@ function Hero() {
           <a href="#tiers" className="hover:text-white transition-colors">Membership</a>
           <a href="#team" className="hover:text-white transition-colors">Team</a>
           <a href="#blog" className="hover:text-white transition-colors">Insights</a>
+          <Link to="/registry" className="hover:text-white transition-colors">Registry</Link>
           <Link to="/verify" className="hover:text-white transition-colors">Verify</Link>
         </div>
 
@@ -550,6 +551,7 @@ function Footer() {
               <li><Link to="/login" className="hover:text-paper transition-colors">Sign in</Link></li>
               <li><Link to="/login" className="hover:text-paper transition-colors">Register</Link></li>
               <li><Link to="/verify" className="hover:text-paper transition-colors">Verify certificate</Link></li>
+              <li><Link to="/registry" className="hover:text-paper transition-colors">Public registry</Link></li>
             </ul>
           </div>
           <div>
