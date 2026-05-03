@@ -74,9 +74,7 @@ function Hero() {
       {/* Navbar */}
       <nav className="relative z-20 max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-sm border border-brass/60 flex items-center justify-center">
-            <span className="font-serif text-brass text-base font-bold tracking-tight">N</span>
-          </div>
+          <img src={namaLogo} alt="NAMA logo" className="w-10 h-10 rounded-full object-cover" />
           <div className="leading-tight">
             <p className="font-serif text-white text-lg font-semibold tracking-tight">NAMA</p>
             <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">Media Arts · Zambia</p>
@@ -536,9 +534,7 @@ function Footer() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-sm border border-brass/60 flex items-center justify-center">
-                <span className="font-serif text-brass text-base font-bold">N</span>
-              </div>
+              <img src={namaLogo} alt="NAMA logo" className="w-10 h-10 rounded-full object-cover" />
               <p className="font-serif text-paper text-lg">NAMA</p>
             </div>
             <p className="text-[12px] leading-relaxed">
