@@ -6,6 +6,7 @@ import {
   QrCode, User, Phone, Building2, MapPin, Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import namaLogo from "@/assets/nama-logo.jpg";
 import {
   fetchMyMember, fetchCategories, fetchMyCertificate,
 } from "@/lib/nama-api";
@@ -99,9 +100,7 @@ function DashboardHeader({ email, onSignOut }: { email: string; onSignOut: () =>
     <header className="border-b border-border bg-paper">
       <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-sm border border-brass/60 flex items-center justify-center">
-            <span className="font-serif text-brass text-sm font-bold">N</span>
-          </div>
+          <img src={namaLogo} alt="NAMA logo" className="w-9 h-9 rounded-full object-cover" />
           <div className="leading-tight">
             <p className="font-serif text-foreground text-base font-semibold">NAMA</p>
             <p className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Member portal</p>

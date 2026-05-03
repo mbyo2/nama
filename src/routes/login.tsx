@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import namaLogo from "@/assets/nama-logo.jpg";
 import { toast } from "sonner";
 
 async function getSupabase() {
@@ -75,9 +76,7 @@ function LoginPage() {
       <div className="max-w-sm w-full animate-fade-up-blur relative z-10">
         {/* Logo — links home */}
         <Link to="/" className="flex items-center justify-center gap-3 mb-8 hover:opacity-80 transition-opacity">
-          <div className="w-9 h-9 rounded-sm border border-brass/60 flex items-center justify-center">
-            <span className="font-serif text-brass text-base font-bold">N</span>
-          </div>
+          <img src={namaLogo} alt="NAMA logo" className="w-10 h-10 rounded-full object-cover" />
           <div className="leading-tight text-left">
             <p className="font-serif text-foreground text-lg font-semibold tracking-tight">NAMA</p>
             <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Media Arts · Zambia</p>
