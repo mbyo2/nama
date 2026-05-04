@@ -3,9 +3,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ArrowRight, ShieldCheck, FileText, Clock, AlertCircle, LogOut,
-  QrCode, User, Phone, Building2, MapPin, Sparkles,
+  QrCode, User, Phone, Building2, MapPin, Sparkles, Crown,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import namaLogo from "@/assets/nama-logo.jpg";
 import {
   fetchMyMember, fetchCategories, fetchMyCertificate,
