@@ -1,6 +1,6 @@
 # Stage 1: Build the Application
-# We use node:18 as the base for building and installing dependencies.
-FROM node:18 AS build
+# We use node:20 as the base for building and installing dependencies.
+FROM node:20 AS build
 
 # Set the working directory inside the container
 WORKDIR /usr/src/app
@@ -15,24 +15,33 @@ RUN npm install
 # Copy the rest of the application source code
 COPY . .
 
+# Build the application
+RUN npm run build
+
 # Stage 2: Create the Final Production Image
-# We use node:18 as the runtime image with all the necessary tools.
-FROM node:18
+# We use node:20 as the runtime image with all the necessary tools.
+FROM node:20
 
 # Set the working directory
 WORKDIR /usr/src/app
 
-# Copy the node_modules and built application files from the 'build' stage
-COPY --from=build /usr/src/app/node_modules ./node_modules
+# Copy the built application files from the 'build' stage
+COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/package*.json ./
-COPY --from=build /usr/src/app .
+COPY --from=build /usr/src/app/node_modules ./node_modules
 
 # Expose the port your app runs on
 ENV PORT=8080
 EXPOSE $PORT
 
+# Supabase environment variables (these should be set during deployment)
+ENV SUPABASE_URL=""
+ENV SUPABASE_PUBLISHABLE_KEY=""
+ENV VITE_SUPABASE_URL=""
+ENV VITE_SUPABASE_PUBLISHABLE_KEY=""
+
 # Run the application using the non-root user (recommended for security)
 USER node
 
 # Define the command to start your application
-CMD [ "node", "index.js" ]
+CMD [ "node", "dist/server/server.js" ]
