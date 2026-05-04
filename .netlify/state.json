@@ -1,0 +1,9 @@
+{
+  "siteId": "",
+  "buildSettings": {
+    "env": {
+      "NETLIFY": "true",
+      "NODE_VERSION": "18"
+    }
+  }
+}

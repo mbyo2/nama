@@ -162,6 +162,7 @@ function devServerFnErrorLogger() {
 
 export default defineConfig(({ command, mode }) => {
   const useCloudflare = process.env.CF_PAGES === "1";
+const useNetlify = process.env.NETLIFY === "1";
 
   // Load VITE_ env vars and define them for SSR
   const env = loadEnv(mode, process.cwd(), "VITE_");
