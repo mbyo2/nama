@@ -1,0 +1,222 @@
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { ArrowLeft, ArrowRight, Calendar, Clock } from "lucide-react";
+import namaLogo from "@/assets/nama-logo.jpg";
+import { BLOG_POSTS, getPostBySlug, type BlogPost } from "@/lib/blog-posts";
+
+export const Route = createFileRoute("/blog/$slug")({
+  loader: ({ params }) => {
+    const post = getPostBySlug(params.slug);
+    if (!post) throw notFound();
+    return { post };
+  },
+  head: ({ loaderData }) => {
+    const post = loaderData?.post;
+    if (!post) {
+      return { meta: [{ title: "Article not found — NAMA" }] };
+    }
+    const url = `https://nama-zambia.lovable.app/blog/${post.slug}`;
+    return {
+      meta: [
+        { title: `${post.title} — NAMA` },
+        { name: "description", content: post.excerpt },
+        { name: "author", content: post.author },
+        { property: "article:published_time", content: post.date },
+        { property: "article:author", content: post.author },
+        { property: "og:type", content: "article" },
+        { property: "og:title", content: post.title },
+        { property: "og:description", content: post.excerpt },
+        { property: "og:image", content: post.image },
+        { property: "og:url", content: url },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: post.title },
+        { name: "twitter:description", content: post.excerpt },
+        { name: "twitter:image", content: post.image },
+        {
+          name: "script:ld+json",
+          content: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "NewsArticle",
+            headline: post.title,
+            description: post.excerpt,
+            image: [post.image],
+            datePublished: post.date,
+            author: [{ "@type": "Person", name: post.author }],
+            publisher: {
+              "@type": "Organization",
+              name: "National Association for Media Arts of Zambia",
+              logo: { "@type": "ImageObject", url: "https://nama-zambia.lovable.app/nama-logo.jpg" },
+            },
+            mainEntityOfPage: { "@type": "WebPage", "@id": url },
+          }),
+        },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
+  component: BlogPostPage,
+  notFoundComponent: () => (
+    <div className="min-h-screen flex items-center justify-center bg-paper px-6">
+      <div className="text-center">
+        <p className="text-[11px] uppercase tracking-[0.25em] text-brass">404</p>
+        <h1 className="mt-3 font-serif text-4xl text-foreground">Article not found</h1>
+        <Link to="/blog" className="mt-6 inline-flex items-center gap-1.5 text-brass text-[13px]">
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to the blog
+        </Link>
+      </div>
+    </div>
+  ),
+  errorComponent: ({ error }) => (
+    <div className="min-h-screen flex items-center justify-center bg-paper px-6">
+      <div className="text-center max-w-md">
+        <h1 className="font-serif text-3xl text-foreground">Something went wrong</h1>
+        <p className="mt-3 text-sm text-muted-foreground">{error.message}</p>
+        <Link to="/blog" className="mt-6 inline-flex items-center gap-1.5 text-brass text-[13px]">
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to the blog
+        </Link>
+      </div>
+    </div>
+  ),
+});
+
+function BlogPostPage() {
+  const { post } = Route.useLoaderData();
+  const others = BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 3);
+
+  return (
+    <div className="min-h-screen bg-paper text-foreground">
+      {/* Nav */}
+      <nav className="border-b border-border bg-paper">
+        <div className="max-w-4xl mx-auto px-6 h-20 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3">
+            <img src={namaLogo} alt="NAMA logo" className="w-10 h-10 rounded-full object-cover" />
+            <div className="leading-tight">
+              <p className="font-serif text-foreground text-lg font-semibold tracking-tight">NAMA</p>
+              <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Media Arts Zambia</p>
+            </div>
+          </Link>
+          <Link to="/blog" className="text-[12px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5">
+            <ArrowLeft className="w-3.5 h-3.5" /> All articles
+          </Link>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <header className="border-b border-border">
+        <div className="max-w-3xl mx-auto px-6 pt-16 pb-10">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-brass">— NAMA Insights</p>
+          <h1 className="mt-4 font-serif text-4xl sm:text-5xl text-foreground tracking-tight" style={{ lineHeight: "1.1" }}>
+            {post.title}
+          </h1>
+          <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-muted-foreground">
+            <span>By <span className="text-foreground">{post.author}</span></span>
+            <span className="inline-flex items-center gap-1.5"><Calendar className="w-3 h-3" />{post.dateLabel}</span>
+            <span className="inline-flex items-center gap-1.5"><Clock className="w-3 h-3" />{post.readMinutes} min read</span>
+          </div>
+        </div>
+        <div className="max-w-5xl mx-auto px-6 pb-12">
+          <div className="aspect-[16/9] overflow-hidden bg-muted">
+            <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+          </div>
+        </div>
+      </header>
+
+      {/* Body */}
+      <main className="py-16">
+        <article className="max-w-2xl mx-auto px-6">
+          <ArticleBody body={post.body} />
+        </article>
+      </main>
+
+      {/* More posts */}
+      {others.length > 0 && (
+        <section className="border-t border-border bg-ink text-paper py-20">
+          <div className="max-w-6xl mx-auto px-6">
+            <h2 className="font-serif text-3xl mb-10">More from the blog</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {others.map((p) => (
+                <Link key={p.slug} to="/blog/$slug" params={{ slug: p.slug }} className="group block">
+                  <div className="aspect-[4/3] overflow-hidden mb-4">
+                    <img src={p.image} alt={p.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700" />
+                  </div>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-2">By {p.author}</p>
+                  <h3 className="font-serif text-lg text-paper leading-snug group-hover:text-brass transition-colors">{p.title}</h3>
+                  <p className="mt-3 text-[12px] text-brass inline-flex items-center gap-1.5">
+                    Read <ArrowRight className="w-3 h-3" />
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+/* Lightweight markdown-ish renderer — handles ###, >, -, **bold**, _italic_, paragraphs. */
+function ArticleBody({ body }: { body: BlogPost["body"] }) {
+  const blocks = body.trim().split(/\n\n+/);
+  const out: React.ReactNode[] = [];
+  let listBuf: string[] = [];
+
+  const flushList = (key: string) => {
+    if (listBuf.length === 0) return;
+    out.push(
+      <ul key={`ul-${key}`} className="my-6 space-y-2 list-disc pl-5 text-[16px] text-foreground/85 leading-relaxed">
+        {listBuf.map((it, i) => (
+          <li key={i}>{renderInline(it.replace(/^-\s+/, ""))}</li>
+        ))}
+      </ul>,
+    );
+    listBuf = [];
+  };
+
+  blocks.forEach((raw, i) => {
+    const block = raw.trim();
+    if (block.startsWith("- ")) {
+      block.split("\n").forEach((l) => listBuf.push(l));
+      return;
+    }
+    flushList(String(i));
+
+    if (block.startsWith("### ")) {
+      out.push(
+        <h2 key={i} className="font-serif text-2xl text-foreground mt-12 mb-4 tracking-tight">
+          {renderInline(block.slice(4))}
+        </h2>,
+      );
+    } else if (block.startsWith("> ")) {
+      out.push(
+        <blockquote key={i} className="my-8 pl-5 border-l-2 border-brass italic font-serif text-xl text-foreground/85 leading-snug">
+          {renderInline(block.replace(/^>\s?/gm, "").trim())}
+        </blockquote>,
+      );
+    } else {
+      out.push(
+        <p key={i} className="my-5 text-[16px] text-foreground/85 leading-[1.75]">
+          {renderInline(block)}
+        </p>,
+      );
+    }
+  });
+  flushList("end");
+  return <>{out}</>;
+}
+
+function renderInline(text: string): React.ReactNode {
+  // **bold** then _italic_
+  const parts: React.ReactNode[] = [];
+  const regex = /(\*\*[^*]+\*\*|_[^_]+_)/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = regex.exec(text)) !== null) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    const tok = m[0];
+    if (tok.startsWith("**")) parts.push(<strong key={key++} className="text-foreground font-semibold">{tok.slice(2, -2)}</strong>);
+    else parts.push(<em key={key++} className="italic">{tok.slice(1, -1)}</em>);
+    last = m.index + tok.length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
