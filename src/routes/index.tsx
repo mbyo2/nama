@@ -9,9 +9,10 @@ import heroBg from "@/assets/nama-hero.jpg";
 import namaLogo from "@/assets/nama-logo.jpg";
 import { formatZmw } from "@/lib/nama";
 import {
-  NATIONAL_EXECUTIVE, BLOG_POSTS, UPCOMING_EVENT,
+  NATIONAL_EXECUTIVE, UPCOMING_EVENT,
   NAMA_MISSION, NAMA_VISION, NAMA_CONTACT_EMAIL,
 } from "@/lib/nama-content";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -442,12 +443,11 @@ function Blog() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/10">
-          {BLOG_POSTS.map((p) => (
-            <a
-              key={p.url}
-              href={p.url}
-              target="_blank"
-              rel="noopener noreferrer"
+          {BLOG_POSTS.slice(0, 3).map((p) => (
+            <Link
+              key={p.slug}
+              to="/blog/$slug"
+              params={{ slug: p.slug }}
               className="bg-ink hover:bg-[#13110d] transition-colors group flex flex-col"
             >
               <div className="aspect-[4/3] overflow-hidden">
@@ -468,8 +468,13 @@ function Blog() {
                   Read article <ArrowRight className="w-3 h-3" />
                 </p>
               </div>
-            </a>
+            </Link>
           ))}
+        </div>
+        <div className="mt-12 text-center">
+          <Link to="/blog" className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.25em] text-brass hover:text-paper transition-colors">
+            View all articles <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </div>
     </section>

@@ -11,6 +11,13 @@ async function getSupabase() {
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
+  head: () => ({
+    meta: [
+      { title: "Sign in — NAMA Zambia Member Portal" },
+      { name: "description", content: "Sign in or create your NAMA membership account to register, pay dues, and access your digital certificate." },
+      { name: "robots", content: "noindex, follow" },
+    ],
+  }),
 });
 
 function LoginPage() {
