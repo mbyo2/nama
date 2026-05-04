@@ -82,7 +82,21 @@ export const Route = createRootRoute({
   }),
   shellComponent: RootShell,
   component: RootComponent,
+  notFoundComponent: NotFound,
 });
+
+function NotFound() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-paper px-6">
+      <div className="text-center">
+        <p className="text-[11px] uppercase tracking-[0.25em] text-brass">404</p>
+        <h1 className="mt-3 font-serif text-5xl text-foreground">Page not found</h1>
+        <p className="mt-3 text-sm text-muted-foreground">The page you're looking for doesn't exist.</p>
+        <a href="/" className="mt-8 inline-block px-6 py-3 bg-ink text-paper text-[12px] uppercase tracking-[0.2em]">Back to home</a>
+      </div>
+    </div>
+  );
+}
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
