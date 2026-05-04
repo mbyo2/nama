@@ -31,6 +31,7 @@ function DashboardPage() {
   const [member, setMember] = useState<Member | null>(null);
   const [categories, setCategories] = useState<MembershipCategory[]>([]);
   const [certificate, setCertificate] = useState<Certificate | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
