@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Users, ShieldAlert } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { ArrowLeft, Loader2, Users, ShieldAlert, ShieldCheck, UserPlus, UserMinus, Crown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { membershipStatusLabel, formatZmw } from "@/lib/nama";
 import type { Member, MembershipStatus } from "@/lib/nama";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -17,41 +18,123 @@ export const Route = createFileRoute("/admin")({
 });
 
 interface PaymentSummary { total_paid: number; total_records: number; }
+interface AdminEntry { user_id: string; email: string; granted_at: string; }
 
 function AdminPage() {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [adminsExist, setAdminsExist] = useState<boolean | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
+  const [admins, setAdmins] = useState<AdminEntry[]>([]);
   const [summary, setSummary] = useState<PaymentSummary>({ total_paid: 0, total_records: 0 });
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | MembershipStatus>("all");
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const reload = useCallback(async () => {
+    if (!user) return;
+    const { data: roles } = await supabase
+      .from("user_roles").select("role").eq("user_id", user.id);
+    const admin = (roles ?? []).some((r) => r.role === "admin");
+    setIsAdmin(admin);
+
+    // Anyone signed in can probe whether ANY admin exists (read your own roles + count via head-only).
+    const { count } = await supabase
+      .from("user_roles").select("*", { count: "exact", head: true }).eq("role", "admin");
+    setAdminsExist((count ?? 0) > 0);
+
+    if (!admin) { setLoading(false); return; }
+
+    const [{ data: m }, { data: p }, { data: a }] = await Promise.all([
+      supabase.from("members").select("*").order("created_at", { ascending: false }),
+      supabase.from("payments").select("amount_zmw,status"),
+      supabase.rpc("list_admins"),
+    ]);
+    setMembers((m ?? []) as Member[]);
+    setAdmins((a ?? []) as AdminEntry[]);
+    const paid = (p ?? []).filter((x) => x.status === "success");
+    setSummary({
+      total_paid: paid.reduce((s, x) => s + (x.amount_zmw ?? 0), 0),
+      total_records: paid.length,
+    });
+    setLoading(false);
+  }, [user]);
 
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate({ to: "/login" }); return; }
-    (async () => {
-      const { data: roles } = await supabase
-        .from("user_roles").select("role").eq("user_id", user.id);
-      const admin = (roles ?? []).some((r) => r.role === "admin");
-      setIsAdmin(admin);
-      if (!admin) { setLoading(false); return; }
+    reload();
+  }, [user, authLoading, navigate, reload]);
 
-      const [{ data: m }, { data: p }] = await Promise.all([
-        supabase.from("members").select("*").order("created_at", { ascending: false }),
-        supabase.from("payments").select("amount_zmw,status"),
-      ]);
-      setMembers((m ?? []) as Member[]);
-      const paid = (p ?? []).filter((x) => x.status === "success");
-      setSummary({
-        total_paid: paid.reduce((s, x) => s + (x.amount_zmw ?? 0), 0),
-        total_records: paid.length,
-      });
-      setLoading(false);
-    })();
-  }, [user, authLoading, navigate]);
+  const handleClaim = async () => {
+    setBusyId("claim");
+    const { data, error } = await supabase.rpc("claim_first_admin");
+    setBusyId(null);
+    if (error) return toast.error(error.message);
+    if (data === true) {
+      toast.success("You are now the founding admin");
+      reload();
+    } else {
+      toast.error("An admin already exists");
+    }
+  };
+
+  const handleStatusChange = async (memberId: string, status: MembershipStatus) => {
+    setBusyId(memberId);
+    const { error } = await supabase.rpc("admin_set_member_status", { _member_id: memberId, _status: status });
+    setBusyId(null);
+    if (error) return toast.error(error.message);
+    toast.success(`Marked as ${membershipStatusLabel(status)}`);
+    reload();
+  };
+
+  const handleGrant = async (m: Member) => {
+    setBusyId(m.user_id);
+    const { error } = await supabase.rpc("grant_admin", { _target: m.user_id });
+    setBusyId(null);
+    if (error) return toast.error(error.message);
+    toast.success(`${m.full_name} is now an admin`);
+    reload();
+  };
+
+  const handleRevoke = async (a: AdminEntry) => {
+    if (a.user_id === user?.id && !confirm("Remove your own admin role?")) return;
+    setBusyId(a.user_id);
+    const { error } = await supabase.rpc("revoke_admin", { _target: a.user_id });
+    setBusyId(null);
+    if (error) return toast.error(error.message);
+    toast.success("Admin role removed");
+    reload();
+  };
 
   if (authLoading || loading) {
     return <div className="min-h-screen bg-paper flex items-center justify-center"><Loader2 className="w-5 h-5 text-brass animate-spin" /></div>;
+  }
+
+  // Founding-admin claim screen
+  if (!isAdmin && adminsExist === false) {
+    return (
+      <div className="min-h-screen bg-paper flex items-center justify-center px-6">
+        <div className="max-w-md text-center">
+          <Crown className="w-10 h-10 text-brass mx-auto" strokeWidth={1.4} />
+          <h1 className="mt-6 font-serif text-3xl text-foreground">Claim founding admin</h1>
+          <p className="mt-3 text-muted-foreground text-[14px]">
+            No NAMA secretariat administrator has been registered yet. As the first signed-in member, you can claim the founding admin role to bootstrap the system.
+          </p>
+          <button
+            onClick={handleClaim}
+            disabled={busyId === "claim"}
+            className="mt-8 inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-6 py-3.5 text-sm font-semibold hover:bg-brass/90 disabled:opacity-60"
+          >
+            {busyId === "claim" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
+            Become founding admin
+          </button>
+          <Link to="/app" className="mt-6 block text-[13px] text-muted-foreground underline">Back to dashboard</Link>
+        </div>
+      </div>
+    );
   }
 
   if (!isAdmin) {
@@ -75,6 +158,18 @@ function AdminPage() {
     acc[m.status] = (acc[m.status] ?? 0) + 1; return acc;
   }, { active: 0, pending: 0, expired: 0, suspended: 0 });
 
+  const filtered = members.filter((m) => {
+    if (statusFilter !== "all" && m.status !== statusFilter) return false;
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return m.full_name.toLowerCase().includes(q)
+      || m.nrc_number.toLowerCase().includes(q)
+      || m.artistic_discipline.toLowerCase().includes(q)
+      || m.province.toLowerCase().includes(q);
+  });
+
+  const adminUserIds = new Set(admins.map((a) => a.user_id));
+
   return (
     <div className="min-h-screen bg-paper text-foreground">
       <header className="border-b border-border">
@@ -88,7 +183,7 @@ function AdminPage() {
 
       <main className="max-w-6xl mx-auto px-6 py-12">
         <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass">— Admin console</p>
-        <h1 className="mt-3 font-serif text-4xl text-foreground tracking-tight">Members & revenue.</h1>
+        <h1 className="mt-3 font-serif text-4xl text-foreground tracking-tight">Members, roles & revenue.</h1>
 
         <div className="mt-10 grid sm:grid-cols-4 gap-px bg-border">
           <Stat label="Total members" value={String(members.length)} />
@@ -97,44 +192,125 @@ function AdminPage() {
           <Stat label="Revenue (ZMW)" value={formatZmw(summary.total_paid)} sub={`${summary.total_records} payments`} />
         </div>
 
-        <div className="mt-12 flex items-center gap-2">
-          <Users className="w-4 h-4 text-brass" />
-          <p className="text-[11px] uppercase tracking-[0.25em] text-brass">All members</p>
-        </div>
+        {/* Admins */}
+        <section className="mt-14">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-brass" />
+            <p className="text-[11px] uppercase tracking-[0.25em] text-brass">Administrators ({admins.length})</p>
+          </div>
+          <div className="mt-4 border border-border bg-card divide-y divide-border">
+            {admins.map((a) => (
+              <div key={a.user_id} className="flex items-center justify-between px-4 py-3">
+                <div>
+                  <p className="text-[14px] text-foreground">{a.email}</p>
+                  <p className="text-[11px] text-muted-foreground">Granted {new Date(a.granted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}{a.user_id === user?.id ? " · you" : ""}</p>
+                </div>
+                <button
+                  onClick={() => handleRevoke(a)}
+                  disabled={busyId === a.user_id || admins.length <= 1}
+                  className="inline-flex items-center gap-1.5 text-[12px] text-destructive hover:underline disabled:opacity-40 disabled:no-underline"
+                  title={admins.length <= 1 ? "Cannot remove the last admin" : "Revoke admin"}
+                >
+                  <UserMinus className="w-3.5 h-3.5" /> Revoke
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        <div className="mt-4 border border-border bg-card overflow-x-auto">
-          <table className="w-full text-[13px]">
-            <thead className="bg-paper text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              <tr>
-                <th className="text-left font-medium px-4 py-3">Name</th>
-                <th className="text-left font-medium px-4 py-3">Discipline</th>
-                <th className="text-left font-medium px-4 py-3">Province</th>
-                <th className="text-left font-medium px-4 py-3">NRC</th>
-                <th className="text-left font-medium px-4 py-3">Status</th>
-                <th className="text-left font-medium px-4 py-3">Joined</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((m) => (
-                <tr key={m.id} className="border-t border-border">
-                  <td className="px-4 py-3 text-foreground">{m.full_name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{m.artistic_discipline}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{m.province}</td>
-                  <td className="px-4 py-3 font-mono text-[12px] text-muted-foreground">{m.nrc_number}</td>
-                  <td className="px-4 py-3">
-                    <StatusPill status={m.status} />
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {new Date(m.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                  </td>
+        {/* Members */}
+        <section className="mt-14">
+          <div className="flex flex-wrap items-center gap-3 justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-brass" />
+              <p className="text-[11px] uppercase tracking-[0.25em] text-brass">All members</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search name, NRC, discipline…"
+                className="text-[13px] px-3 py-2 border border-border bg-paper rounded-sm focus:outline-none focus:border-brass"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+                className="text-[13px] px-3 py-2 border border-border bg-paper rounded-sm focus:outline-none focus:border-brass"
+              >
+                <option value="all">All statuses</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="expired">Expired</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-4 border border-border bg-card overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead className="bg-paper text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                <tr>
+                  <th className="text-left font-medium px-4 py-3">Name</th>
+                  <th className="text-left font-medium px-4 py-3">Discipline</th>
+                  <th className="text-left font-medium px-4 py-3">Province</th>
+                  <th className="text-left font-medium px-4 py-3">NRC</th>
+                  <th className="text-left font-medium px-4 py-3">Status</th>
+                  <th className="text-left font-medium px-4 py-3">Role</th>
+                  <th className="text-left font-medium px-4 py-3">Actions</th>
                 </tr>
-              ))}
-              {members.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No members yet.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filtered.map((m) => {
+                  const isMemberAdmin = adminUserIds.has(m.user_id);
+                  const busy = busyId === m.id || busyId === m.user_id;
+                  return (
+                    <tr key={m.id} className="border-t border-border align-middle">
+                      <td className="px-4 py-3 text-foreground">{m.full_name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{m.artistic_discipline}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{m.province}</td>
+                      <td className="px-4 py-3 font-mono text-[12px] text-muted-foreground">{m.nrc_number}</td>
+                      <td className="px-4 py-3"><StatusPill status={m.status} /></td>
+                      <td className="px-4 py-3">
+                        {isMemberAdmin ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-brass"><Crown className="w-3 h-3" /> Admin</span>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground">Member</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <select
+                            value={m.status}
+                            onChange={(e) => handleStatusChange(m.id, e.target.value as MembershipStatus)}
+                            disabled={busy}
+                            className="text-[11px] px-2 py-1 border border-border bg-paper rounded-sm"
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="active">Active</option>
+                            <option value="expired">Expired</option>
+                            <option value="suspended">Suspended</option>
+                          </select>
+                          {!isMemberAdmin && (
+                            <button
+                              onClick={() => handleGrant(m)}
+                              disabled={busy}
+                              className="inline-flex items-center gap-1 text-[11px] text-foreground hover:text-brass disabled:opacity-40"
+                            >
+                              <UserPlus className="w-3 h-3" /> Make admin
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <tr><td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">No members match.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </main>
     </div>
   );

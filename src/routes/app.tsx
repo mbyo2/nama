@@ -3,9 +3,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ArrowRight, ShieldCheck, FileText, Clock, AlertCircle, LogOut,
-  QrCode, User, Phone, Building2, MapPin, Sparkles,
+  QrCode, User, Phone, Building2, MapPin, Sparkles, Crown,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import namaLogo from "@/assets/nama-logo.jpg";
 import {
   fetchMyMember, fetchCategories, fetchMyCertificate,
@@ -30,6 +31,7 @@ function DashboardPage() {
   const [member, setMember] = useState<Member | null>(null);
   const [categories, setCategories] = useState<MembershipCategory[]>([]);
   const [certificate, setCertificate] = useState<Certificate | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,15 +43,17 @@ function DashboardPage() {
     let cancelled = false;
     (async () => {
       try {
-        const [m, c, cert] = await Promise.all([
+        const [m, c, cert, roles] = await Promise.all([
           fetchMyMember(user.id),
           fetchCategories(),
           fetchMyCertificate(user.id),
+          supabase.from("user_roles").select("role").eq("user_id", user.id),
         ]);
         if (cancelled) return;
         setMember(m);
         setCategories(c);
         setCertificate(cert);
+        setIsAdmin((roles.data ?? []).some((r) => r.role === "admin"));
       } catch (err) {
         console.error(err);
         toast.error("Could not load your dashboard");
@@ -77,7 +81,7 @@ function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-paper text-foreground">
-      <DashboardHeader email={user?.email ?? ""} onSignOut={handleSignOut} />
+      <DashboardHeader email={user?.email ?? ""} onSignOut={handleSignOut} isAdmin={isAdmin} />
 
       <main className="max-w-4xl mx-auto px-6 py-12">
         {!member ? (
@@ -95,7 +99,7 @@ function DashboardPage() {
 }
 
 /* ── Header ── */
-function DashboardHeader({ email, onSignOut }: { email: string; onSignOut: () => void }) {
+function DashboardHeader({ email, onSignOut, isAdmin }: { email: string; onSignOut: () => void; isAdmin: boolean }) {
   return (
     <header className="border-b border-border bg-paper">
       <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -107,6 +111,11 @@ function DashboardHeader({ email, onSignOut }: { email: string; onSignOut: () =>
           </div>
         </Link>
         <div className="flex items-center gap-4">
+          {isAdmin && (
+            <Link to="/admin" className="inline-flex items-center gap-1.5 text-[12px] text-brass hover:text-brass/80">
+              <Crown className="w-3.5 h-3.5" /> Admin
+            </Link>
+          )}
           <span className="hidden sm:inline text-[12px] text-muted-foreground truncate max-w-[180px]">{email}</span>
           <button
             onClick={onSignOut}
