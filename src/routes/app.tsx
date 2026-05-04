@@ -43,15 +43,17 @@ function DashboardPage() {
     let cancelled = false;
     (async () => {
       try {
-        const [m, c, cert] = await Promise.all([
+        const [m, c, cert, roles] = await Promise.all([
           fetchMyMember(user.id),
           fetchCategories(),
           fetchMyCertificate(user.id),
+          supabase.from("user_roles").select("role").eq("user_id", user.id),
         ]);
         if (cancelled) return;
         setMember(m);
         setCategories(c);
         setCertificate(cert);
+        setIsAdmin((roles.data ?? []).some((r) => r.role === "admin"));
       } catch (err) {
         console.error(err);
         toast.error("Could not load your dashboard");
