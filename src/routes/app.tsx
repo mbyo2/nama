@@ -99,7 +99,7 @@ function DashboardPage() {
 }
 
 /* ── Header ── */
-function DashboardHeader({ email, onSignOut }: { email: string; onSignOut: () => void }) {
+function DashboardHeader({ email, onSignOut, isAdmin }: { email: string; onSignOut: () => void; isAdmin: boolean }) {
   return (
     <header className="border-b border-border bg-paper">
       <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -111,6 +111,11 @@ function DashboardHeader({ email, onSignOut }: { email: string; onSignOut: () =>
           </div>
         </Link>
         <div className="flex items-center gap-4">
+          {isAdmin && (
+            <Link to="/admin" className="inline-flex items-center gap-1.5 text-[12px] text-brass hover:text-brass/80">
+              <Crown className="w-3.5 h-3.5" /> Admin
+            </Link>
+          )}
           <span className="hidden sm:inline text-[12px] text-muted-foreground truncate max-w-[180px]">{email}</span>
           <button
             onClick={onSignOut}
