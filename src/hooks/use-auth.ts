@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { User, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface AuthState {
   user: User | null;
@@ -14,26 +15,32 @@ export function useAuth(): AuthState {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Dynamic import to avoid SSR issues with supabase client
-    import("@/integrations/supabase/client").then(({ supabase }) => {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoading(false);
-      });
+    let mounted = true;
 
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoading(false);
-      });
+    // Subscribe FIRST so any state change during getSession() is captured.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, newSession) => {
+        if (!mounted) return;
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+      }
+    );
 
-      return () => subscription.unsubscribe();
+    // Then restore the persisted session from storage.
+    supabase.auth.getSession().then(({ data: { session: existing } }) => {
+      if (!mounted) return;
+      setSession(existing);
+      setUser(existing?.user ?? null);
+      setIsLoading(false);
     });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = useCallback(async () => {
-    const { supabase } = await import("@/integrations/supabase/client");
     await supabase.auth.signOut();
   }, []);
 
