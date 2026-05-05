@@ -3,11 +3,7 @@ import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import namaLogo from "@/assets/nama-logo.jpg";
 import { toast } from "sonner";
-
-async function getSupabase() {
-  const { supabase } = await import("@/integrations/supabase/client");
-  return supabase;
-}
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -54,15 +50,15 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      const supabase = await getSupabase();
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: `${window.location.origin}/app` },
         });
         if (error) throw error;
-        toast.success("Check your email to confirm your account");
+        toast.success("Account created — welcome!");
+        navigate({ to: "/app" });
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
