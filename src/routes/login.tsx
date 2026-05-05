@@ -54,10 +54,11 @@ function LoginPage() {
         const { error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: `${window.location.origin}/app` },
         });
         if (error) throw error;
-        toast.success("Check your email to confirm your account");
+        toast.success("Account created — welcome!");
+        navigate({ to: "/app" });
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
