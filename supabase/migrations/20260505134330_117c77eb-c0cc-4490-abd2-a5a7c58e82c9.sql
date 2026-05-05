@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS public.habit_logs CASCADE;
+DROP TABLE IF EXISTS public.habits CASCADE;
