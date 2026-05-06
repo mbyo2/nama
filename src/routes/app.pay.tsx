@@ -52,14 +52,7 @@ function PayPage() {
         if (cancelled) return;
         const cat = cats.find((c) => c.id === m.membership_category_id) ?? null;
         setCategory(cat);
-
-        if (m.status === "active") {
-          const existing = await fetchMyCertificate(user.id);
-          if (existing) {
-            navigate({ to: "/app" });
-            return;
-          }
-        }
+        // No auto-redirect — renewals & re-issues are allowed any time.
       } catch (e) {
         console.error(e);
         toast.error("Could not load payment details");
