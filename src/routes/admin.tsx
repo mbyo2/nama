@@ -1,10 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
-import { ArrowLeft, Loader2, Users, ShieldAlert, ShieldCheck, UserPlus, UserMinus, Crown } from "lucide-react";
+import {
+  ArrowLeft, Loader2, Users, ShieldAlert, ShieldCheck, UserPlus, UserMinus,
+  Crown, Award, Ban, RefreshCw,
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { membershipStatusLabel, formatZmw } from "@/lib/nama";
 import type { Member, MembershipStatus } from "@/lib/nama";
+import { adminRevokeCertificate, adminIssueCertificate } from "@/lib/nama-api";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -18,15 +22,22 @@ export const Route = createFileRoute("/admin")({
 });
 
 interface PaymentSummary { total_paid: number; total_records: number; }
-interface AdminEntry { user_id: string; email: string; granted_at: string; }
+interface AdminEntry { user_id: string; email: string; granted_at: string; is_superadmin: boolean; }
+interface CertRow {
+  id: string; member_id: string; user_id: string;
+  certificate_number: string; revoked: boolean;
+  revoke_reason: string | null; expires_at: string;
+}
 
 function AdminPage() {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isSuperadmin, setIsSuperadmin] = useState(false);
   const [adminsExist, setAdminsExist] = useState<boolean | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [admins, setAdmins] = useState<AdminEntry[]>([]);
+  const [certs, setCerts] = useState<CertRow[]>([]);
   const [summary, setSummary] = useState<PaymentSummary>({ total_paid: 0, total_records: 0 });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -37,23 +48,27 @@ function AdminPage() {
     if (!user) return;
     const { data: roles } = await supabase
       .from("user_roles").select("role").eq("user_id", user.id);
-    const admin = (roles ?? []).some((r) => r.role === "admin");
+    const myRoles = (roles ?? []).map((r) => r.role);
+    const admin = myRoles.includes("admin") || myRoles.includes("superadmin");
+    const superadmin = myRoles.includes("superadmin");
     setIsAdmin(admin);
+    setIsSuperadmin(superadmin);
 
-    // Anyone signed in can probe whether ANY admin exists (read your own roles + count via head-only).
     const { count } = await supabase
-      .from("user_roles").select("*", { count: "exact", head: true }).eq("role", "admin");
+      .from("user_roles").select("*", { count: "exact", head: true }).in("role", ["admin", "superadmin"]);
     setAdminsExist((count ?? 0) > 0);
 
     if (!admin) { setLoading(false); return; }
 
-    const [{ data: m }, { data: p }, { data: a }] = await Promise.all([
+    const [{ data: m }, { data: p }, { data: a }, { data: c }] = await Promise.all([
       supabase.from("members").select("*").order("created_at", { ascending: false }),
       supabase.from("payments").select("amount_zmw,status"),
       supabase.rpc("list_admins"),
+      supabase.from("certificates").select("id,member_id,user_id,certificate_number,revoked,revoke_reason,expires_at").order("issued_at", { ascending: false }),
     ]);
     setMembers((m ?? []) as Member[]);
     setAdmins((a ?? []) as AdminEntry[]);
+    setCerts((c ?? []) as CertRow[]);
     const paid = (p ?? []).filter((x) => x.status === "success");
     setSummary({
       total_paid: paid.reduce((s, x) => s + (x.amount_zmw ?? 0), 0),
@@ -107,6 +122,37 @@ function AdminPage() {
     if (error) return toast.error(error.message);
     toast.success("Admin role removed");
     reload();
+  };
+
+  const handleIssueCert = async (m: Member) => {
+    if (!confirm(`Manually issue a certificate for ${m.full_name}? Any existing live certificate will be revoked and replaced.`)) return;
+    setBusyId(`cert-${m.id}`);
+    try {
+      await adminIssueCertificate(m.id);
+      toast.success(`Certificate issued for ${m.full_name}`);
+      reload();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to issue certificate";
+      toast.error(msg);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleRevokeCert = async (cert: CertRow, memberName: string) => {
+    const reason = prompt(`Revoke certificate ${cert.certificate_number} for ${memberName}.\nEnter a reason (recorded in the audit log):`);
+    if (reason === null) return;
+    setBusyId(`cert-${cert.id}`);
+    try {
+      await adminRevokeCertificate(cert.id, reason || "Revoked by administrator");
+      toast.success("Certificate revoked");
+      reload();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to revoke certificate";
+      toast.error(msg);
+    } finally {
+      setBusyId(null);
+    }
   };
 
   if (authLoading || loading) {
@@ -202,20 +248,38 @@ function AdminPage() {
             {admins.map((a) => (
               <div key={a.user_id} className="flex items-center justify-between px-4 py-3">
                 <div>
-                  <p className="text-[14px] text-foreground">{a.email}</p>
+                  <p className="text-[14px] text-foreground flex items-center gap-2">
+                    {a.email}
+                    {a.is_superadmin && (
+                      <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.15em] bg-brass/15 text-brass px-1.5 py-0.5 rounded-sm">
+                        <Crown className="w-3 h-3" /> Superadmin
+                      </span>
+                    )}
+                  </p>
                   <p className="text-[11px] text-muted-foreground">Granted {new Date(a.granted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}{a.user_id === user?.id ? " · you" : ""}</p>
                 </div>
-                <button
-                  onClick={() => handleRevoke(a)}
-                  disabled={busyId === a.user_id || admins.length <= 1}
-                  className="inline-flex items-center gap-1.5 text-[12px] text-destructive hover:underline disabled:opacity-40 disabled:no-underline"
-                  title={admins.length <= 1 ? "Cannot remove the last admin" : "Revoke admin"}
-                >
-                  <UserMinus className="w-3.5 h-3.5" /> Revoke
-                </button>
+                {isSuperadmin && !a.is_superadmin ? (
+                  <button
+                    onClick={() => handleRevoke(a)}
+                    disabled={busyId === a.user_id || admins.length <= 1}
+                    className="inline-flex items-center gap-1.5 text-[12px] text-destructive hover:underline disabled:opacity-40 disabled:no-underline"
+                    title={admins.length <= 1 ? "Cannot remove the last admin" : "Revoke admin"}
+                  >
+                    <UserMinus className="w-3.5 h-3.5" /> Revoke
+                  </button>
+                ) : a.is_superadmin ? (
+                  <span className="text-[11px] text-muted-foreground italic">Protected</span>
+                ) : (
+                  <span className="text-[11px] text-muted-foreground italic">Superadmin only</span>
+                )}
               </div>
             ))}
           </div>
+          {!isSuperadmin && (
+            <p className="mt-2 text-[11px] text-muted-foreground italic">
+              Only superadmins can grant or revoke admin roles.
+            </p>
+          )}
         </section>
 
         {/* Members */}
@@ -263,6 +327,8 @@ function AdminPage() {
                 {filtered.map((m) => {
                   const isMemberAdmin = adminUserIds.has(m.user_id);
                   const busy = busyId === m.id || busyId === m.user_id;
+                  const liveCert = certs.find((c) => c.member_id === m.id && !c.revoked) ?? null;
+                  const certBusy = busyId === `cert-${m.id}` || (liveCert ? busyId === `cert-${liveCert.id}` : false);
                   return (
                     <tr key={m.id} className="border-t border-border align-middle">
                       <td className="px-4 py-3 text-foreground">{m.full_name}</td>
@@ -290,7 +356,25 @@ function AdminPage() {
                             <option value="expired">Expired</option>
                             <option value="suspended">Suspended</option>
                           </select>
-                          {!isMemberAdmin && (
+                          {liveCert ? (
+                            <button
+                              onClick={() => handleRevokeCert(liveCert, m.full_name)}
+                              disabled={certBusy}
+                              className="inline-flex items-center gap-1 text-[11px] text-destructive hover:underline disabled:opacity-40"
+                              title={`Revoke certificate ${liveCert.certificate_number}`}
+                            >
+                              <Ban className="w-3 h-3" /> Revoke cert
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleIssueCert(m)}
+                              disabled={certBusy}
+                              className="inline-flex items-center gap-1 text-[11px] text-foreground hover:text-brass disabled:opacity-40"
+                            >
+                              <Award className="w-3 h-3" /> Issue cert
+                            </button>
+                          )}
+                          {isSuperadmin && !isMemberAdmin && (
                             <button
                               onClick={() => handleGrant(m)}
                               disabled={busy}

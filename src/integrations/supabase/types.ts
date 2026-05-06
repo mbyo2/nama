@@ -22,7 +22,9 @@ export type Database = {
           id: string
           issued_at: string
           member_id: string
+          revoke_reason: string | null
           revoked: boolean
+          revoked_at: string | null
           user_id: string
           verification_token: string
         }
@@ -33,7 +35,9 @@ export type Database = {
           id?: string
           issued_at?: string
           member_id: string
+          revoke_reason?: string | null
           revoked?: boolean
+          revoked_at?: string | null
           user_id: string
           verification_token: string
         }
@@ -44,7 +48,9 @@ export type Database = {
           id?: string
           issued_at?: string
           member_id?: string
+          revoke_reason?: string | null
           revoked?: boolean
+          revoked_at?: string | null
           user_id?: string
           verification_token?: string
         }
@@ -263,12 +269,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_issue_certificate: { Args: { _member_id: string }; Returns: string }
+      admin_revoke_certificate: {
+        Args: { _cert_id: string; _reason: string }
+        Returns: boolean
+      }
       admin_set_member_status: {
         Args: { _member_id: string; _status: string }
         Returns: boolean
       }
       claim_first_admin: { Args: never; Returns: boolean }
+      expire_lapsed_memberships: { Args: never; Returns: number }
       grant_admin: { Args: { _target: string }; Returns: boolean }
+      grant_superadmin: { Args: { _target: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -281,6 +294,7 @@ export type Database = {
         Returns: {
           email: string
           granted_at: string
+          is_superadmin: boolean
           user_id: string
         }[]
       }
@@ -313,7 +327,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "member"
+      app_role: "admin" | "member" | "superadmin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -441,7 +455,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "member"],
+      app_role: ["admin", "member", "superadmin"],
     },
   },
 } as const
