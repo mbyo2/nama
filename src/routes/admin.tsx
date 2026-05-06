@@ -21,18 +21,13 @@ export const Route = createFileRoute("/admin")({
   }),
 });
 
-export const Route = createFileRoute("/admin")({
-  component: AdminPage,
-  head: () => ({
-    meta: [
-      { title: "Admin — NAMA" },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-});
-
 interface PaymentSummary { total_paid: number; total_records: number; }
-interface AdminEntry { user_id: string; email: string; granted_at: string; }
+interface AdminEntry { user_id: string; email: string; granted_at: string; is_superadmin: boolean; }
+interface CertRow {
+  id: string; member_id: string; user_id: string;
+  certificate_number: string; revoked: boolean;
+  revoke_reason: string | null; expires_at: string;
+}
 
 function AdminPage() {
   const { user, isLoading: authLoading } = useAuth();
