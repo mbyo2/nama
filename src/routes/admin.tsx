@@ -248,20 +248,38 @@ function AdminPage() {
             {admins.map((a) => (
               <div key={a.user_id} className="flex items-center justify-between px-4 py-3">
                 <div>
-                  <p className="text-[14px] text-foreground">{a.email}</p>
+                  <p className="text-[14px] text-foreground flex items-center gap-2">
+                    {a.email}
+                    {a.is_superadmin && (
+                      <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.15em] bg-brass/15 text-brass px-1.5 py-0.5 rounded-sm">
+                        <Crown className="w-3 h-3" /> Superadmin
+                      </span>
+                    )}
+                  </p>
                   <p className="text-[11px] text-muted-foreground">Granted {new Date(a.granted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}{a.user_id === user?.id ? " · you" : ""}</p>
                 </div>
-                <button
-                  onClick={() => handleRevoke(a)}
-                  disabled={busyId === a.user_id || admins.length <= 1}
-                  className="inline-flex items-center gap-1.5 text-[12px] text-destructive hover:underline disabled:opacity-40 disabled:no-underline"
-                  title={admins.length <= 1 ? "Cannot remove the last admin" : "Revoke admin"}
-                >
-                  <UserMinus className="w-3.5 h-3.5" /> Revoke
-                </button>
+                {isSuperadmin && !a.is_superadmin ? (
+                  <button
+                    onClick={() => handleRevoke(a)}
+                    disabled={busyId === a.user_id || admins.length <= 1}
+                    className="inline-flex items-center gap-1.5 text-[12px] text-destructive hover:underline disabled:opacity-40 disabled:no-underline"
+                    title={admins.length <= 1 ? "Cannot remove the last admin" : "Revoke admin"}
+                  >
+                    <UserMinus className="w-3.5 h-3.5" /> Revoke
+                  </button>
+                ) : a.is_superadmin ? (
+                  <span className="text-[11px] text-muted-foreground italic">Protected</span>
+                ) : (
+                  <span className="text-[11px] text-muted-foreground italic">Superadmin only</span>
+                )}
               </div>
             ))}
           </div>
+          {!isSuperadmin && (
+            <p className="mt-2 text-[11px] text-muted-foreground italic">
+              Only superadmins can grant or revoke admin roles.
+            </p>
+          )}
         </section>
 
         {/* Members */}
