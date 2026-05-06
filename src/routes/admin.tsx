@@ -1,11 +1,25 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
-import { ArrowLeft, Loader2, Users, ShieldAlert, ShieldCheck, UserPlus, UserMinus, Crown } from "lucide-react";
+import {
+  ArrowLeft, Loader2, Users, ShieldAlert, ShieldCheck, UserPlus, UserMinus,
+  Crown, Award, Ban, RefreshCw,
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { membershipStatusLabel, formatZmw } from "@/lib/nama";
 import type { Member, MembershipStatus } from "@/lib/nama";
+import { adminRevokeCertificate, adminIssueCertificate } from "@/lib/nama-api";
 import { toast } from "sonner";
+
+export const Route = createFileRoute("/admin")({
+  component: AdminPage,
+  head: () => ({
+    meta: [
+      { title: "Admin — NAMA" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+});
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
