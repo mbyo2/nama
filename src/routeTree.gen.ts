@@ -19,6 +19,7 @@ import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AppRegisterRouteImport } from './routes/app.register'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppPaymentsRouteImport } from './routes/app.payments'
 import { Route as AppPayRouteImport } from './routes/app.pay'
 import { Route as AppCertificateRouteImport } from './routes/app.certificate'
 
@@ -72,6 +73,11 @@ const AppProfileRoute = AppProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPaymentsRoute = AppPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPayRoute = AppPayRouteImport.update({
   id: '/pay',
   path: '/pay',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/verify': typeof VerifyRoute
   '/app/certificate': typeof AppCertificateRoute
   '/app/pay': typeof AppPayRoute
+  '/app/payments': typeof AppPaymentsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/register': typeof AppRegisterRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/verify': typeof VerifyRoute
   '/app/certificate': typeof AppCertificateRoute
   '/app/pay': typeof AppPayRoute
+  '/app/payments': typeof AppPaymentsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/register': typeof AppRegisterRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/verify': typeof VerifyRoute
   '/app/certificate': typeof AppCertificateRoute
   '/app/pay': typeof AppPayRoute
+  '/app/payments': typeof AppPaymentsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/register': typeof AppRegisterRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/app/certificate'
     | '/app/pay'
+    | '/app/payments'
     | '/app/profile'
     | '/app/register'
     | '/blog/$slug'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/app/certificate'
     | '/app/pay'
+    | '/app/payments'
     | '/app/profile'
     | '/app/register'
     | '/blog/$slug'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/app/certificate'
     | '/app/pay'
+    | '/app/payments'
     | '/app/profile'
     | '/app/register'
     | '/blog/$slug'
@@ -254,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/payments': {
+      id: '/app/payments'
+      path: '/payments'
+      fullPath: '/app/payments'
+      preLoaderRoute: typeof AppPaymentsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/pay': {
       id: '/app/pay'
       path: '/pay'
@@ -274,6 +293,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppCertificateRoute: typeof AppCertificateRoute
   AppPayRoute: typeof AppPayRoute
+  AppPaymentsRoute: typeof AppPaymentsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRegisterRoute: typeof AppRegisterRoute
 }
@@ -281,6 +301,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppCertificateRoute: AppCertificateRoute,
   AppPayRoute: AppPayRoute,
+  AppPaymentsRoute: AppPaymentsRoute,
   AppProfileRoute: AppProfileRoute,
   AppRegisterRoute: AppRegisterRoute,
 }
