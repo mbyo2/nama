@@ -354,7 +354,25 @@ function AdminPage() {
                             <option value="expired">Expired</option>
                             <option value="suspended">Suspended</option>
                           </select>
-                          {!isMemberAdmin && (
+                          {liveCert ? (
+                            <button
+                              onClick={() => handleRevokeCert(liveCert, m.full_name)}
+                              disabled={certBusy}
+                              className="inline-flex items-center gap-1 text-[11px] text-destructive hover:underline disabled:opacity-40"
+                              title={`Revoke certificate ${liveCert.certificate_number}`}
+                            >
+                              <Ban className="w-3 h-3" /> Revoke cert
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleIssueCert(m)}
+                              disabled={certBusy}
+                              className="inline-flex items-center gap-1 text-[11px] text-foreground hover:text-brass disabled:opacity-40"
+                            >
+                              <Award className="w-3 h-3" /> Issue cert
+                            </button>
+                          )}
+                          {isSuperadmin && !isMemberAdmin && (
                             <button
                               onClick={() => handleGrant(m)}
                               disabled={busy}
