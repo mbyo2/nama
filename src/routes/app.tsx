@@ -176,9 +176,18 @@ function RegisteredView({
 }) {
   const isActive = member.status === "active";
   const isPending = member.status === "pending";
+  const isExpired = member.status === "expired";
+  const isSuspended = member.status === "suspended";
   const expiresOn = member.membership_expires_at
     ? new Date(member.membership_expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
     : null;
+
+  // Days until expiry (negative if past)
+  const daysUntilExpiry = member.membership_expires_at
+    ? Math.ceil((new Date(member.membership_expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
+  const expiringSoon = isActive && daysUntilExpiry !== null && daysUntilExpiry <= 30 && daysUntilExpiry > 0;
+  const lapsed = isActive && daysUntilExpiry !== null && daysUntilExpiry <= 0;
 
   return (
     <div className="space-y-10">
@@ -193,31 +202,51 @@ function RegisteredView({
       {/* Status card */}
       <StatusCard member={member} category={category} certificate={certificate} expiresOn={expiresOn} />
 
-      {/* Action panel */}
+      {/* Action panels */}
       {isPending && (
-        <div className="rounded-sm border border-brass/40 bg-brass/5 p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-5 justify-between">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-full bg-brass/15 flex items-center justify-center flex-shrink-0">
-              <Clock className="w-5 h-5 text-brass" strokeWidth={1.8} />
-            </div>
-            <div>
-              <p className="font-serif text-lg text-foreground">Payment pending</p>
-              <p className="text-[13px] text-muted-foreground mt-1">
-                Pay your annual {category?.name ?? "membership"} fee
-                {category ? <> of <strong className="text-foreground">{formatZmw(category.annual_fee_zmw)}</strong></> : null} to activate your membership and issue your certificate.
-              </p>
-            </div>
-          </div>
-          <Link
-            to="/app/pay"
-            className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-6 py-3.5 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98] whitespace-nowrap"
-          >
-            Pay now <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+        <ActionBanner
+          tone="brass"
+          icon={Clock}
+          title="Payment pending"
+          body={<>Pay your annual {category?.name ?? "membership"} fee
+            {category ? <> of <strong className="text-foreground">{formatZmw(category.annual_fee_zmw)}</strong></> : null} to activate your membership and issue your certificate.</>}
+          ctaTo="/app/pay"
+          ctaLabel="Pay now"
+        />
       )}
 
-      {isActive && certificate && (
+      {(isExpired || lapsed) && (
+        <ActionBanner
+          tone="destructive"
+          icon={RefreshCw}
+          title="Membership expired"
+          body={<>Your NAMA membership has lapsed{expiresOn ? <> on {expiresOn}</> : null}. Renew now to reactivate your member benefits and reissue your certificate.</>}
+          ctaTo="/app/pay"
+          ctaLabel="Renew now"
+        />
+      )}
+
+      {expiringSoon && (
+        <ActionBanner
+          tone="brass"
+          icon={Clock}
+          title={`Expires in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"}`}
+          body={<>Your membership expires on <strong className="text-foreground">{expiresOn}</strong>. Renew early to avoid any interruption.</>}
+          ctaTo="/app/pay"
+          ctaLabel="Renew early"
+        />
+      )}
+
+      {isSuspended && (
+        <ActionBanner
+          tone="destructive"
+          icon={AlertCircle}
+          title="Membership suspended"
+          body="Your membership has been suspended by the secretariat. Please contact NAMA for reinstatement."
+        />
+      )}
+
+      {isActive && !lapsed && certificate && (
         <div className="rounded-sm border border-border bg-card p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-5 justify-between">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-full bg-brass/15 flex items-center justify-center flex-shrink-0">
@@ -252,8 +281,68 @@ function RegisteredView({
         </div>
       )}
 
+      {/* Quick actions */}
+      <div className="grid sm:grid-cols-2 gap-3">
+        <Link
+          to="/app/profile"
+          className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors"
+        >
+          <Pencil className="w-4 h-4 text-brass" />
+          <div>
+            <p className="text-[13px] text-foreground font-medium">Edit profile</p>
+            <p className="text-[11px] text-muted-foreground">Update contact details, discipline, bio</p>
+          </div>
+        </Link>
+        <Link
+          to="/app/payments"
+          className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors"
+        >
+          <Receipt className="w-4 h-4 text-brass" />
+          <div>
+            <p className="text-[13px] text-foreground font-medium">Payment history</p>
+            <p className="text-[11px] text-muted-foreground">View and print past receipts</p>
+          </div>
+        </Link>
+      </div>
+
       {/* Profile */}
       <ProfileCard member={member} />
+    </div>
+  );
+}
+
+function ActionBanner({
+  tone, icon: Icon, title, body, ctaTo, ctaLabel,
+}: {
+  tone: "brass" | "destructive";
+  icon: typeof Clock;
+  title: string;
+  body: React.ReactNode;
+  ctaTo?: "/app/pay";
+  ctaLabel?: string;
+}) {
+  const styles = tone === "brass"
+    ? { wrap: "border-brass/40 bg-brass/5", iconWrap: "bg-brass/15", iconCls: "text-brass", btn: "bg-brass text-ink hover:bg-brass/90" }
+    : { wrap: "border-destructive/40 bg-destructive/5", iconWrap: "bg-destructive/15", iconCls: "text-destructive", btn: "bg-destructive text-paper hover:bg-destructive/90" };
+  return (
+    <div className={`rounded-sm border ${styles.wrap} p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-5 justify-between`}>
+      <div className="flex items-start gap-4">
+        <div className={`w-10 h-10 rounded-full ${styles.iconWrap} flex items-center justify-center flex-shrink-0`}>
+          <Icon className={`w-5 h-5 ${styles.iconCls}`} strokeWidth={1.8} />
+        </div>
+        <div>
+          <p className="font-serif text-lg text-foreground">{title}</p>
+          <p className="text-[13px] text-muted-foreground mt-1">{body}</p>
+        </div>
+      </div>
+      {ctaTo && ctaLabel && (
+        <Link
+          to={ctaTo}
+          className={`inline-flex items-center gap-2 rounded-sm ${styles.btn} px-6 py-3.5 text-sm font-semibold transition-all active:scale-[0.98] whitespace-nowrap`}
+        >
+          {ctaLabel} <ArrowRight className="w-4 h-4" />
+        </Link>
+      )}
     </div>
   );
 }
