@@ -327,6 +327,8 @@ function AdminPage() {
                 {filtered.map((m) => {
                   const isMemberAdmin = adminUserIds.has(m.user_id);
                   const busy = busyId === m.id || busyId === m.user_id;
+                  const liveCert = certs.find((c) => c.member_id === m.id && !c.revoked) ?? null;
+                  const certBusy = busyId === `cert-${m.id}` || (liveCert ? busyId === `cert-${liveCert.id}` : false);
                   return (
                     <tr key={m.id} className="border-t border-border align-middle">
                       <td className="px-4 py-3 text-foreground">{m.full_name}</td>
