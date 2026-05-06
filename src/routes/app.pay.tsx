@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Smartphone } from "lucide
 import { useAuth } from "@/hooks/use-auth";
 import {
   fetchMyMember, fetchCategories, createPayment, completePayment,
-  activateMembership, issueCertificate, fetchMyCertificate,
+  activateMembership, issueCertificate,
 } from "@/lib/nama-api";
 import {
   formatZmw, detectMobileProvider, isValidZmPhone,
