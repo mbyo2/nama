@@ -33,9 +33,11 @@ function AdminPage() {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isSuperadmin, setIsSuperadmin] = useState(false);
   const [adminsExist, setAdminsExist] = useState<boolean | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [admins, setAdmins] = useState<AdminEntry[]>([]);
+  const [certs, setCerts] = useState<CertRow[]>([]);
   const [summary, setSummary] = useState<PaymentSummary>({ total_paid: 0, total_records: 0 });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -46,23 +48,27 @@ function AdminPage() {
     if (!user) return;
     const { data: roles } = await supabase
       .from("user_roles").select("role").eq("user_id", user.id);
-    const admin = (roles ?? []).some((r) => r.role === "admin");
+    const myRoles = (roles ?? []).map((r) => r.role);
+    const admin = myRoles.includes("admin") || myRoles.includes("superadmin");
+    const superadmin = myRoles.includes("superadmin");
     setIsAdmin(admin);
+    setIsSuperadmin(superadmin);
 
-    // Anyone signed in can probe whether ANY admin exists (read your own roles + count via head-only).
     const { count } = await supabase
-      .from("user_roles").select("*", { count: "exact", head: true }).eq("role", "admin");
+      .from("user_roles").select("*", { count: "exact", head: true }).in("role", ["admin", "superadmin"]);
     setAdminsExist((count ?? 0) > 0);
 
     if (!admin) { setLoading(false); return; }
 
-    const [{ data: m }, { data: p }, { data: a }] = await Promise.all([
+    const [{ data: m }, { data: p }, { data: a }, { data: c }] = await Promise.all([
       supabase.from("members").select("*").order("created_at", { ascending: false }),
       supabase.from("payments").select("amount_zmw,status"),
       supabase.rpc("list_admins"),
+      supabase.from("certificates").select("id,member_id,user_id,certificate_number,revoked,revoke_reason,expires_at").order("issued_at", { ascending: false }),
     ]);
     setMembers((m ?? []) as Member[]);
     setAdmins((a ?? []) as AdminEntry[]);
+    setCerts((c ?? []) as CertRow[]);
     const paid = (p ?? []).filter((x) => x.status === "success");
     setSummary({
       total_paid: paid.reduce((s, x) => s + (x.amount_zmw ?? 0), 0),
