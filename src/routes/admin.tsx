@@ -124,6 +124,37 @@ function AdminPage() {
     reload();
   };
 
+  const handleIssueCert = async (m: Member) => {
+    if (!confirm(`Manually issue a certificate for ${m.full_name}? Any existing live certificate will be revoked and replaced.`)) return;
+    setBusyId(`cert-${m.id}`);
+    try {
+      await adminIssueCertificate(m.id);
+      toast.success(`Certificate issued for ${m.full_name}`);
+      reload();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to issue certificate";
+      toast.error(msg);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleRevokeCert = async (cert: CertRow, memberName: string) => {
+    const reason = prompt(`Revoke certificate ${cert.certificate_number} for ${memberName}.\nEnter a reason (recorded in the audit log):`);
+    if (reason === null) return;
+    setBusyId(`cert-${cert.id}`);
+    try {
+      await adminRevokeCertificate(cert.id, reason || "Revoked by administrator");
+      toast.success("Certificate revoked");
+      reload();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to revoke certificate";
+      toast.error(msg);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   if (authLoading || loading) {
     return <div className="min-h-screen bg-paper flex items-center justify-center"><Loader2 className="w-5 h-5 text-brass animate-spin" /></div>;
   }
