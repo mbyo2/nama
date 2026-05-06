@@ -62,6 +62,65 @@ export async function updateMemberCategory(memberId: string, categoryId: string)
   if (error) throw error;
 }
 
+// Member self-service: update editable profile fields (NRC + full name locked)
+export interface UpdateMemberInput {
+  tpin: string | null;
+  phone_number: string;
+  artistic_discipline: string;
+  province: string;
+  city: string;
+  years_experience: number;
+  bio: string | null;
+  institution_name: string | null;
+}
+
+export async function updateMyMember(memberId: string, patch: UpdateMemberInput): Promise<void> {
+  const { error } = await supabase
+    .from("members")
+    .update(patch)
+    .eq("id", memberId);
+  if (error) throw error;
+}
+
+// Payment history for the signed-in user
+export async function fetchMyPayments(userId: string) {
+  const { data, error } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+// Admin: revoke a certificate
+export async function adminRevokeCertificate(certificateId: string, reason: string): Promise<void> {
+  const { error } = await supabase.rpc("admin_revoke_certificate", {
+    _cert_id: certificateId,
+    _reason: reason,
+  });
+  if (error) throw error;
+}
+
+// Admin: manually issue / re-issue a certificate
+export async function adminIssueCertificate(memberId: string): Promise<string> {
+  const { data, error } = await supabase.rpc("admin_issue_certificate", {
+    _member_id: memberId,
+  });
+  if (error) throw error;
+  return data as unknown as string;
+}
+
+// Admin: fetch all certificates (RLS allows admins SELECT all)
+export async function adminFetchCertificates() {
+  const { data, error } = await supabase
+    .from("certificates")
+    .select("*")
+    .order("issued_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
 // ── Payments ──────────────────────────────────────────────────────
 
 export async function createPayment(opts: {
