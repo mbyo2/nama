@@ -72,9 +72,14 @@ function PayPage() {
   };
 
   const handleSubmit = async () => {
-    if (!user || !member || !category || !phoneValid) return;
+    console.log('Payment submit clicked:', { user: !!user, member: !!member, category: !!category, phoneValid, provider, phone });
+    if (!user || !member || !category || !phoneValid) {
+      console.error('Payment validation failed:', { user: !!user, member: !!member, category: !!category, phoneValid });
+      return;
+    }
     setPhase("processing");
     try {
+      console.log('Creating payment...');
       const payment = await createPayment({
         userId: user.id,
         memberId: member.id,
@@ -83,6 +88,7 @@ function PayPage() {
         provider,
         phone,
       });
+      console.log('Payment created:', payment);
       setReference(payment.transaction_reference);
 
       // Simulated mobile-money settlement delay
@@ -187,7 +193,10 @@ function PayPage() {
 
             <button
               type="button"
-              onClick={handleSubmit}
+              onClick={() => {
+                console.log('Pay Now button clicked');
+                handleSubmit();
+              }}
               disabled={!phoneValid}
               className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 disabled:opacity-40 disabled:pointer-events-none transition-all active:scale-[0.99]"
             >
