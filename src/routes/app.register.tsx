@@ -18,6 +18,21 @@ export const Route = createFileRoute("/app/register")({
       { name: "description", content: "Complete your NAMA member profile and pick your annual tier." },
     ],
   }),
+  errorComponent: ({ error }) => {
+    console.error('Registration page error:', error);
+    return (
+      <div className="min-h-screen bg-paper flex items-center justify-center px-6">
+        <div className="text-center">
+          <h1 className="text-2xl text-foreground mb-4">Registration Error</h1>
+          <p className="text-muted-foreground mb-4">Something went wrong loading the registration form.</p>
+          <p className="text-sm text-muted-foreground">Error: {error.message}</p>
+          <Link to="/app" className="mt-4 inline-block text-brass hover:text-brass/80">
+            ← Back to dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  },
 });
 
 interface FormState {
@@ -60,11 +75,16 @@ function RegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const [bootstrapped, setBootstrapped] = useState(false);
 
+  console.log('RegisterPage: Initial state - authLoading=', authLoading, 'user=', !!user, 'bootstrapped=', bootstrapped);
+
   useEffect(() => {
-    console.log('RegisterPage: authLoading=', authLoading, 'user=', user);
-    if (authLoading) return;
+    console.log('RegisterPage: useEffect triggered - authLoading=', authLoading, 'user=', !!user);
+    if (authLoading) {
+      console.log('RegisterPage: Still loading auth...');
+      return;
+    }
     if (!user) { 
-      console.log('RegisterPage: No user, redirecting to login');
+      console.log('RegisterPage: No user found, redirecting to login');
       navigate({ to: "/login" }); 
       return; 
     }
@@ -165,11 +185,17 @@ function RegisterPage() {
     }
   };
 
-  console.log('RegisterPage: authLoading=', authLoading, 'bootstrapped=', bootstrapped);
+  console.log('RegisterPage: Rendering check - authLoading=', authLoading, 'bootstrapped=', bootstrapped);
   if (authLoading || !bootstrapped) {
+    console.log('RegisterPage: Showing loading spinner - authLoading=', authLoading, 'bootstrapped=', bootstrapped);
     return (
       <div className="min-h-screen bg-paper flex items-center justify-center">
-        <Loader2 className="w-5 h-5 text-brass animate-spin" />
+        <div className="text-center">
+          <Loader2 className="w-5 h-5 text-brass animate-spin mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">
+            {authLoading ? 'Checking authentication...' : 'Loading registration form...'}
+          </p>
+        </div>
       </div>
     );
   }
