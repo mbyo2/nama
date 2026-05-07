@@ -86,7 +86,7 @@ function DashboardPage() {
 
       <main className="max-w-4xl mx-auto px-6 py-12">
         {!member ? (
-          <NotRegistered />
+          <NotRegistered isAdmin={isAdmin} />
         ) : (
           <RegisteredView
             member={member}
@@ -131,7 +131,51 @@ function DashboardHeader({ email, onSignOut, isAdmin }: { email: string; onSignO
 }
 
 /* ── Not registered ── */
-function NotRegistered() {
+function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
+  if (isAdmin) {
+    return (
+      <div>
+        <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass">— Admin Dashboard</p>
+        <h1 className="mt-3 font-serif text-4xl sm:text-5xl text-foreground tracking-tight" style={{ lineHeight: "1.1" }}>
+          Welcome to the<br /><em className="italic">admin panel.</em>
+        </h1>
+        <p className="mt-5 text-muted-foreground max-w-xl">
+          As an administrator, you have access to member management, certificate issuance, and system administration tools. You can register as a member anytime, but it's not required for admin access.
+        </p>
+
+        <div className="mt-10 grid sm:grid-cols-3 gap-px bg-border">
+          {[
+            { icon: Users, label: "Members", desc: "View and manage all member registrations" },
+            { icon: ShieldCheck, label: "Certificates", desc: "Issue and verify member certificates" },
+            { icon: Crown, label: "Admin", desc: "System administration and user roles" },
+          ].map((s) => (
+            <div key={s.label} className="bg-paper p-6">
+              <s.icon className="w-5 h-5 text-brass mb-3" strokeWidth={1.5} />
+              <p className="text-[11px] uppercase tracking-[0.2em] text-brass mb-1">{s.label}</p>
+              <p className="text-[13px] text-muted-foreground">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10 flex flex-col sm:flex-row gap-3">
+          <Link
+            to="/admin"
+            className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
+          >
+            <Crown className="w-4 h-4" />
+            Go to admin panel <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link
+            to="/app/register"
+            className="inline-flex items-center gap-2 rounded-sm border border-border bg-paper text-foreground px-7 py-4 text-sm font-medium hover:bg-card transition-all"
+          >
+            Register as member <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass">— Welcome to NAMA</p>
