@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ArrowRight, ShieldCheck, FileText, Clock, AlertCircle, LogOut,
-  QrCode, User, Phone, Building2, MapPin, Sparkles, Crown,
+  QrCode, User, Users, Phone, Building2, MapPin, Sparkles, Crown,
   RefreshCw, Pencil, Receipt,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
