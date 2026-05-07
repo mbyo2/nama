@@ -3,8 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ArrowRight, ShieldCheck, FileText, Clock, AlertCircle, LogOut,
-  QrCode, User, Users, Phone, Building2, MapPin, Sparkles, Crown,
-  RefreshCw, Pencil, Receipt,
+  QrCode, User, Users, Phone, Building2, MapPin, Sparkles, Crown, RefreshCw, Pencil, Receipt, HelpCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -199,7 +198,7 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
       <div className="mt-10">
         <button
           onClick={() => {
-            window.location.href = '/simple-register';
+            window.location.href = '/register';
           }}
           className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
         >
@@ -254,7 +253,7 @@ function RegisteredView({
           title="Payment pending"
           body={<>Pay your annual {category?.name ?? "membership"} fee
             {category ? <> of <strong className="text-foreground">{formatZmw(category.annual_fee_zmw)}</strong></> : null} to activate your membership and issue your certificate.</>}
-          ctaTo="/simple-pay"
+          ctaTo="/pay"
           ctaLabel="Pay now"
         />
       )}
@@ -265,7 +264,7 @@ function RegisteredView({
           icon={RefreshCw}
           title="Membership expired"
           body={<>Your NAMA membership has lapsed{expiresOn ? <> on {expiresOn}</> : null}. Renew now to reactivate your member benefits and reissue your certificate.</>}
-          ctaTo="/simple-pay"
+          ctaTo="/pay"
           ctaLabel="Renew now"
         />
       )}
@@ -276,7 +275,7 @@ function RegisteredView({
           icon={Clock}
           title={`Expires in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"}`}
           body={<>Your membership expires on <strong className="text-foreground">{expiresOn}</strong>. Renew early to avoid any interruption.</>}
-          ctaTo="/simple-pay"
+          ctaTo="/pay"
           ctaLabel="Renew early"
         />
       )}
@@ -326,9 +325,9 @@ function RegisteredView({
       )}
 
       {/* Quick actions */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <button
-          onClick={() => window.location.href = '/simple-profile'}
+          onClick={() => window.location.href = '/profile'}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <Pencil className="w-4 h-4 text-brass" />
@@ -338,7 +337,7 @@ function RegisteredView({
           </div>
         </button>
         <button
-          onClick={() => window.location.href = '/simple-payments'}
+          onClick={() => window.location.href = '/payments'}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <Receipt className="w-4 h-4 text-brass" />
@@ -348,13 +347,23 @@ function RegisteredView({
           </div>
         </button>
         <button
-          onClick={() => window.location.href = '/simple-messages'}
+          onClick={() => window.location.href = '/messages'}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <FileText className="w-4 h-4 text-brass" />
           <div>
             <p className="text-[13px] text-foreground font-medium">Messages</p>
             <p className="text-[11px] text-muted-foreground">View communications from NAMA</p>
+          </div>
+        </button>
+        <button
+          onClick={() => window.location.href = '/help'}
+          className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
+        >
+          <HelpCircle className="w-4 h-4 text-brass" />
+          <div>
+            <p className="text-[13px] text-foreground font-medium">Help & Support</p>
+            <p className="text-[11px] text-muted-foreground">Get help with your account</p>
           </div>
         </button>
       </div>
