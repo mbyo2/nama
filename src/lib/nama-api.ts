@@ -287,22 +287,6 @@ export async function adminSetMemberStatus(memberId: string, status: string): Pr
   return data as boolean;
 }
 
-export async function adminRevokeCertificate(certId: string, reason: string): Promise<boolean> {
-  const { data, error } = await supabase.rpc('admin_revoke_certificate', {
-    _cert_id: certId,
-    _reason: reason
-  });
-  if (error) throw error;
-  return data as boolean;
-}
-
-export async function adminIssueCertificate(memberId: string): Promise<string> {
-  const { data, error } = await supabase.rpc('admin_issue_certificate', {
-    _member_id: memberId
-  });
-  if (error) throw error;
-  return data as string;
-}
 
 export async function expireLapsedMemberships(): Promise<number> {
   const { data, error } = await supabase.rpc('expire_lapsed_memberships');
