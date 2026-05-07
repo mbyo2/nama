@@ -11,16 +11,19 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as RegistryRouteImport } from './routes/registry'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PaymentsRouteImport } from './routes/payments'
+import { Route as PayRouteImport } from './routes/pay'
+import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
-import { Route as AppRegisterRouteImport } from './routes/app.register'
-import { Route as AppProfileRouteImport } from './routes/app.profile'
-import { Route as AppPaymentsRouteImport } from './routes/app.payments'
-import { Route as AppPayRouteImport } from './routes/app.pay'
 import { Route as AppCertificateRouteImport } from './routes/app.certificate'
 
 const VerifyRoute = VerifyRouteImport.update({
@@ -33,9 +36,39 @@ const RegistryRoute = RegistryRouteImport.update({
   path: '/registry',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentsRoute = PaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PayRoute = PayRouteImport.update({
+  id: '/pay',
+  path: '/pay',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -58,30 +91,15 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
   path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapXmlRoute = SitemapXmlRouteImport.update({
+  id: '/sitemap/xml',
+  path: '/sitemap/xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/blog/$slug',
   path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AppRegisterRoute = AppRegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppProfileRoute = AppProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPaymentsRoute = AppPaymentsRouteImport.update({
-  id: '/payments',
-  path: '/payments',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPayRoute = AppPayRouteImport.update({
-  id: '/pay',
-  path: '/pay',
-  getParentRoute: () => AppRoute,
 } as any)
 const AppCertificateRoute = AppCertificateRouteImport.update({
   id: '/certificate',
@@ -93,30 +111,36 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRouteWithChildren
+  '/help': typeof HelpRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
+  '/pay': typeof PayRoute
+  '/payments': typeof PaymentsRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/registry': typeof RegistryRoute
   '/verify': typeof VerifyRoute
   '/app/certificate': typeof AppCertificateRoute
-  '/app/pay': typeof AppPayRoute
-  '/app/payments': typeof AppPaymentsRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/register': typeof AppRegisterRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRouteWithChildren
+  '/help': typeof HelpRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
+  '/pay': typeof PayRoute
+  '/payments': typeof PaymentsRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/registry': typeof RegistryRoute
   '/verify': typeof VerifyRoute
   '/app/certificate': typeof AppCertificateRoute
-  '/app/pay': typeof AppPayRoute
-  '/app/payments': typeof AppPaymentsRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/register': typeof AppRegisterRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/blog': typeof BlogIndexRoute
 }
 export interface FileRoutesById {
@@ -124,15 +148,18 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/app': typeof AppRouteWithChildren
+  '/help': typeof HelpRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
+  '/pay': typeof PayRoute
+  '/payments': typeof PaymentsRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/registry': typeof RegistryRoute
   '/verify': typeof VerifyRoute
   '/app/certificate': typeof AppCertificateRoute
-  '/app/pay': typeof AppPayRoute
-  '/app/payments': typeof AppPaymentsRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/register': typeof AppRegisterRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRouteTypes {
@@ -141,45 +168,54 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/app'
+    | '/help'
     | '/login'
+    | '/messages'
+    | '/pay'
+    | '/payments'
+    | '/profile'
+    | '/register'
     | '/registry'
     | '/verify'
     | '/app/certificate'
-    | '/app/pay'
-    | '/app/payments'
-    | '/app/profile'
-    | '/app/register'
     | '/blog/$slug'
+    | '/sitemap/xml'
     | '/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/app'
+    | '/help'
     | '/login'
+    | '/messages'
+    | '/pay'
+    | '/payments'
+    | '/profile'
+    | '/register'
     | '/registry'
     | '/verify'
     | '/app/certificate'
-    | '/app/pay'
-    | '/app/payments'
-    | '/app/profile'
-    | '/app/register'
     | '/blog/$slug'
+    | '/sitemap/xml'
     | '/blog'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/app'
+    | '/help'
     | '/login'
+    | '/messages'
+    | '/pay'
+    | '/payments'
+    | '/profile'
+    | '/register'
     | '/registry'
     | '/verify'
     | '/app/certificate'
-    | '/app/pay'
-    | '/app/payments'
-    | '/app/profile'
-    | '/app/register'
     | '/blog/$slug'
+    | '/sitemap/xml'
     | '/blog/'
   fileRoutesById: FileRoutesById
 }
@@ -187,10 +223,17 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AppRoute: typeof AppRouteWithChildren
+  HelpRoute: typeof HelpRoute
   LoginRoute: typeof LoginRoute
+  MessagesRoute: typeof MessagesRoute
+  PayRoute: typeof PayRoute
+  PaymentsRoute: typeof PaymentsRoute
+  ProfileRoute: typeof ProfileRoute
+  RegisterRoute: typeof RegisterRoute
   RegistryRoute: typeof RegistryRoute
   VerifyRoute: typeof VerifyRoute
   BlogSlugRoute: typeof BlogSlugRoute
+  SitemapXmlRoute: typeof SitemapXmlRoute
   BlogIndexRoute: typeof BlogIndexRoute
 }
 
@@ -210,11 +253,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegistryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payments': {
+      id: '/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof PaymentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pay': {
+      id: '/pay'
+      path: '/pay'
+      fullPath: '/pay'
+      preLoaderRoute: typeof PayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -245,40 +330,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap/xml': {
+      id: '/sitemap/xml'
+      path: '/sitemap/xml'
+      fullPath: '/sitemap/xml'
+      preLoaderRoute: typeof SitemapXmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/$slug': {
       id: '/blog/$slug'
       path: '/blog/$slug'
       fullPath: '/blog/$slug'
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/app/register': {
-      id: '/app/register'
-      path: '/register'
-      fullPath: '/app/register'
-      preLoaderRoute: typeof AppRegisterRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/profile': {
-      id: '/app/profile'
-      path: '/profile'
-      fullPath: '/app/profile'
-      preLoaderRoute: typeof AppProfileRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/payments': {
-      id: '/app/payments'
-      path: '/payments'
-      fullPath: '/app/payments'
-      preLoaderRoute: typeof AppPaymentsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/pay': {
-      id: '/app/pay'
-      path: '/pay'
-      fullPath: '/app/pay'
-      preLoaderRoute: typeof AppPayRouteImport
-      parentRoute: typeof AppRoute
     }
     '/app/certificate': {
       id: '/app/certificate'
@@ -292,18 +356,10 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppCertificateRoute: typeof AppCertificateRoute
-  AppPayRoute: typeof AppPayRoute
-  AppPaymentsRoute: typeof AppPaymentsRoute
-  AppProfileRoute: typeof AppProfileRoute
-  AppRegisterRoute: typeof AppRegisterRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppCertificateRoute: AppCertificateRoute,
-  AppPayRoute: AppPayRoute,
-  AppPaymentsRoute: AppPaymentsRoute,
-  AppProfileRoute: AppProfileRoute,
-  AppRegisterRoute: AppRegisterRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -312,10 +368,17 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AppRoute: AppRouteWithChildren,
+  HelpRoute: HelpRoute,
   LoginRoute: LoginRoute,
+  MessagesRoute: MessagesRoute,
+  PayRoute: PayRoute,
+  PaymentsRoute: PaymentsRoute,
+  ProfileRoute: ProfileRoute,
+  RegisterRoute: RegisterRoute,
   RegistryRoute: RegistryRoute,
   VerifyRoute: VerifyRoute,
   BlogSlugRoute: BlogSlugRoute,
+  SitemapXmlRoute: SitemapXmlRoute,
   BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport
