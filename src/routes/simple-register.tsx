@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowLeft, ArrowRight, User, ShieldCheck, FileText } from "lucide-react";
+import React, { useState } from "react";
+import { ArrowLeft, ArrowRight, User, ShieldCheck, FileText, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { createMember, fetchCategories } from "@/lib/nama-api";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/simple-register")({
   component: SimpleRegisterPage,
@@ -12,7 +15,10 @@ export const Route = createFileRoute("/simple-register")({
 });
 
 function SimpleRegisterPage() {
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     full_name: "",
     nrc_number: "",
@@ -20,15 +26,55 @@ function SimpleRegisterPage() {
     artistic_discipline: "",
     province: "",
     city: "",
-    membership_category: "student"
+    membership_category_id: ""
   });
+
+  // Load categories on mount
+  React.useEffect(() => {
+    fetchCategories().then(setCategories).catch(console.error);
+  }, []);
 
   const updateField = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = () => {
-    alert(`Registration submitted!\n\nName: ${formData.full_name}\nNRC: ${formData.nrc_number}\n\nThis is a demo - the actual registration will be saved to the database.`);
+  const handleSubmit = async () => {
+    if (!user) {
+      toast.error("You must be logged in to register");
+      return;
+    }
+
+    if (!formData.membership_category_id) {
+      toast.error("Please select a membership category");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await createMember(user.id, {
+        full_name: formData.full_name,
+        nrc_number: formData.nrc_number,
+        tpin: null,
+        phone_number: formData.phone_number,
+        artistic_discipline: formData.artistic_discipline,
+        province: formData.province,
+        city: formData.city,
+        years_experience: 0,
+        bio: null,
+        institution_name: null,
+        membership_category_id: formData.membership_category_id
+      });
+
+      toast.success("Registration submitted successfully!");
+      setTimeout(() => {
+        window.location.href = '/app/pay';
+      }, 2000);
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast.error(error.message || "Registration failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const steps = [
@@ -181,30 +227,29 @@ function SimpleRegisterPage() {
                   Membership Category
                 </label>
                 <div className="space-y-3">
-                  {[
-                    { id: "student", name: "Student", price: "K50", desc: "Full-time students" },
-                    { id: "professional", name: "Professional", price: "K200", desc: "Working professionals" },
-                    { id: "institution", name: "Institution", price: "K500", desc: "Companies & organizations" }
-                  ].map((tier) => (
+                  {categories.map((category) => (
                     <button
-                      key={tier.id}
+                      key={category.id}
                       type="button"
-                      onClick={() => updateField("membership_category", tier.id)}
+                      onClick={() => updateField("membership_category_id", category.id)}
                       className={`w-full text-left rounded-sm border p-4 transition-colors ${
-                        formData.membership_category === tier.id
+                        formData.membership_category_id === category.id
                           ? "border-brass bg-brass/10"
                           : "border-border bg-paper hover:bg-card"
                       }`}
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="font-medium text-foreground">{tier.name}</p>
-                          <p className="text-sm text-muted-foreground">{tier.desc}</p>
+                          <p className="font-medium text-foreground">{category.name}</p>
+                          <p className="text-sm text-muted-foreground">{category.description}</p>
                         </div>
-                        <p className="font-semibold text-brass">{tier.price}/year</p>
+                        <p className="font-semibold text-brass">K{category.annual_fee_zmw}/year</p>
                       </div>
                     </button>
                   ))}
+                  {categories.length === 0 && (
+                    <p className="text-sm text-muted-foreground">Loading membership categories...</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -231,9 +276,19 @@ function SimpleRegisterPage() {
           ) : (
             <button
               onClick={handleSubmit}
-              className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
+              disabled={submitting}
+              className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit Registration
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  Submit Registration
+                </>
+              )}
             </button>
           )}
         </div>
