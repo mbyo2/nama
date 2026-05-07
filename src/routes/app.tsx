@@ -251,6 +251,15 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
         >
           🧪 Simple test page
         </button>
+        <button
+          onClick={() => {
+            console.log('Simple registration clicked');
+            window.location.href = '/simple-register';
+          }}
+          className="inline-flex items-center gap-2 rounded-sm bg-green-600 text-white px-7 py-4 text-sm font-semibold hover:bg-green-700 transition-all"
+        >
+          🚀 Simple Registration (WORKS)
+        </button>
       </div>
     </div>
   );
