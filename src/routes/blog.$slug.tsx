@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { ArrowLeft, ArrowRight, Calendar, Clock } from "lucide-react";
 import namaLogo from "@/assets/nama-logo.jpg";
 import { BLOG_POSTS, getPostBySlug, type BlogPost } from "@/lib/blog-posts";
@@ -81,6 +82,11 @@ export const Route = createFileRoute("/blog/$slug")({
 function BlogPostPage() {
   const { post } = Route.useLoaderData();
   const others = BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 3);
+
+  // Scroll to top when article loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   return (
     <div className="min-h-screen bg-paper text-foreground">

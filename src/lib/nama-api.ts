@@ -242,3 +242,101 @@ export async function verifyCertificate(token: string): Promise<{
     }) as never,
   };
 }
+
+// Admin functions
+export async function claimFirstAdmin(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('claim_first_admin');
+  if (error) throw error;
+  return data as boolean;
+}
+
+export async function grantAdmin(targetUserId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('grant_admin', { _target: targetUserId });
+  if (error) throw error;
+  return data as boolean;
+}
+
+export async function revokeAdmin(targetUserId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('revoke_admin', { _target: targetUserId });
+  if (error) throw error;
+  return data as boolean;
+}
+
+export async function listAdmins(): Promise<Array<{
+  user_id: string;
+  email: string;
+  granted_at: string;
+  is_superadmin: boolean;
+}>> {
+  const { data, error } = await supabase.rpc('list_admins');
+  if (error) throw error;
+  return data as Array<{
+    user_id: string;
+    email: string;
+    granted_at: string;
+    is_superadmin: boolean;
+  }>;
+}
+
+export async function adminSetMemberStatus(memberId: string, status: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('admin_set_member_status', {
+    _member_id: memberId,
+    _status: status
+  });
+  if (error) throw error;
+  return data as boolean;
+}
+
+export async function adminRevokeCertificate(certId: string, reason: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('admin_revoke_certificate', {
+    _cert_id: certId,
+    _reason: reason
+  });
+  if (error) throw error;
+  return data as boolean;
+}
+
+export async function adminIssueCertificate(memberId: string): Promise<string> {
+  const { data, error } = await supabase.rpc('admin_issue_certificate', {
+    _member_id: memberId
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function expireLapsedMemberships(): Promise<number> {
+  const { data, error } = await supabase.rpc('expire_lapsed_memberships');
+  if (error) throw error;
+  return data as number;
+}
+
+export async function hasRole(userId: string, role: 'admin' | 'superadmin'): Promise<boolean> {
+  const { data, error } = await supabase.rpc('has_role', {
+    _user_id: userId,
+    _role: role
+  });
+  if (error) throw error;
+  return data as boolean;
+}
+
+export async function getPublicMemberRegistry(): Promise<Array<{
+  certificate_number: string;
+  full_name: string;
+  artistic_discipline: string;
+  province: string;
+  membership_category_id: string;
+  issued_at: string;
+  expires_at: string;
+}>> {
+  const { data, error } = await supabase.rpc('public_member_registry');
+  if (error) throw error;
+  return data as Array<{
+    certificate_number: string;
+    full_name: string;
+    artistic_discipline: string;
+    province: string;
+    membership_category_id: string;
+    issued_at: string;
+    expires_at: string;
+  }>;
+}

@@ -67,8 +67,14 @@ function Hero() {
         alt=""
         width={1920}
         height={1280}
+        loading="eager"
         className="absolute inset-0 w-full h-full object-cover object-right pointer-events-none select-none"
         aria-hidden="true"
+        style={{ 
+          imageRendering: 'crisp-edges',
+          transform: 'translateZ(0)',
+          willChange: 'transform'
+        }}
       />
       <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to right, rgba(10,9,7,0.92), rgba(10,9,7,0.55) 45%, transparent 75%)" }} />
       <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to bottom, rgba(10,9,7,0.5), transparent 25%, rgba(10,9,7,0.6))" }} />

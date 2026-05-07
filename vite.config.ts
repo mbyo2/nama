@@ -188,6 +188,23 @@ const useNetlify = process.env.NETLIFY === "1";
       },
       dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            router: ['@tanstack/react-router', '@tanstack/react-start'],
+            ui: ['lucide-react', '@/components/ui'],
+            supabase: ['@supabase/supabase-js'],
+          },
+        },
+      },
+      chunkSizeWarningLimit: 1000,
+      assetsInlineLimit: 4096,
+    },
+    optimizeDeps: {
+      include: ['react', 'react-dom', '@tanstack/react-router'],
+    },
     plugins: [
       tailwindcss(),
       tsConfigPaths({
