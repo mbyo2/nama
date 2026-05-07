@@ -2,13 +2,13 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import {
   ArrowLeft, Loader2, Users, ShieldAlert, ShieldCheck, UserPlus, UserMinus,
-  Crown, Award, Ban, RefreshCw,
+  Crown, Award, Ban, RefreshCw, Mail, Send,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { membershipStatusLabel, formatZmw } from "@/lib/nama";
 import type { Member, MembershipStatus } from "@/lib/nama";
-import { adminRevokeCertificate, adminIssueCertificate } from "@/lib/nama-api";
+import { adminRevokeCertificate, adminIssueCertificate, sendMessageToMember, fetchAdminMessages } from "@/lib/nama-api";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -43,6 +43,8 @@ function AdminPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | MembershipStatus>("all");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [messageModal, setMessageModal] = useState<{ open: boolean; member?: Member }>({ open: false });
+  const [messageForm, setMessageForm] = useState({ subject: "", content: "" });
 
   const reload = useCallback(async () => {
     if (!user) return;
@@ -152,6 +154,34 @@ function AdminPage() {
       toast.error(msg);
     } finally {
       setBusyId(null);
+    }
+  };
+
+  const handleSendMessage = (member: Member) => {
+    setMessageModal({ open: true, member });
+    setMessageForm({ subject: "", content: "" });
+  };
+
+  const handleSubmitMessage = async () => {
+    if (!user || !messageModal.member || !messageForm.subject.trim() || !messageForm.content.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      await sendMessageToMember(
+        messageModal.member.id,
+        user.id,
+        messageForm.subject,
+        messageForm.content,
+        user.email || "Admin",
+        messageModal.member.full_name
+      );
+      toast.success(`Message sent to ${messageModal.member.full_name}`);
+      setMessageModal({ open: false });
+      setMessageForm({ subject: "", content: "" });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send message");
     }
   };
 
@@ -369,11 +399,19 @@ function AdminPage() {
                             <button
                               onClick={() => handleIssueCert(m)}
                               disabled={certBusy}
-                              className="inline-flex items-center gap-1 text-[11px] text-foreground hover:text-brass disabled:opacity-40"
+                              className="inline-flex items-center gap-1 text-[11px] text-brass hover:underline disabled:opacity-40"
+                              title="Issue certificate"
                             >
                               <Award className="w-3 h-3" /> Issue cert
                             </button>
                           )}
+                          <button
+                            onClick={() => handleSendMessage(m)}
+                            className="inline-flex items-center gap-1 text-[11px] text-brass hover:underline"
+                            title="Send message"
+                          >
+                            <Mail className="w-3 h-3" /> Message
+                          </button>
                           {isSuperadmin && !isMemberAdmin && (
                             <button
                               onClick={() => handleGrant(m)}
@@ -396,6 +434,58 @@ function AdminPage() {
           </div>
         </section>
       </main>
+
+      {/* Message Modal */}
+      {messageModal.open && messageModal.member && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
+          <div className="bg-paper border border-border rounded-sm max-w-lg w-full p-6">
+            <h3 className="text-lg font-semibold text-foreground mb-4">
+              Send Message to {messageModal.member.full_name}
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  value={messageForm.subject}
+                  onChange={(e) => setMessageForm(prev => ({ ...prev, subject: e.target.value }))}
+                  placeholder="Enter message subject"
+                  className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brass focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Message
+                </label>
+                <textarea
+                  value={messageForm.content}
+                  onChange={(e) => setMessageForm(prev => ({ ...prev, content: e.target.value }))}
+                  placeholder="Enter your message..."
+                  rows={6}
+                  className="w-full rounded-sm border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brass focus:border-transparent resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleSubmitMessage}
+                className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-4 py-2 text-sm font-semibold hover:bg-brass/90"
+              >
+                <Send className="w-4 h-4" />
+                Send Message
+              </button>
+              <button
+                onClick={() => setMessageModal({ open: false })}
+                className="inline-flex items-center gap-2 rounded-sm border border-border bg-paper text-foreground px-4 py-2 text-sm font-medium hover:bg-card"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

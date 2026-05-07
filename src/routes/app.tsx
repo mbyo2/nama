@@ -326,7 +326,7 @@ function RegisteredView({
       )}
 
       {/* Quick actions */}
-      <div className="grid sm:grid-cols-2 gap-3">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <button
           onClick={() => window.location.href = '/simple-profile'}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
@@ -345,6 +345,16 @@ function RegisteredView({
           <div>
             <p className="text-[13px] text-foreground font-medium">Payment history</p>
             <p className="text-[11px] text-muted-foreground">View and print past receipts</p>
+          </div>
+        </button>
+        <button
+          onClick={() => window.location.href = '/simple-messages'}
+          className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
+        >
+          <FileText className="w-4 h-4 text-brass" />
+          <div>
+            <p className="text-[13px] text-foreground font-medium">Messages</p>
+            <p className="text-[11px] text-muted-foreground">View communications from NAMA</p>
           </div>
         </button>
       </div>

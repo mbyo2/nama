@@ -82,12 +82,87 @@ export async function updateMyMember(memberId: string, patch: UpdateMemberInput)
   if (error) throw error;
 }
 
+// Admin function to update any member field
+export async function updateMember(memberId: string, patch: Partial<UpdateMemberInput & { full_name: string; nrc_number: string }>): Promise<void> {
+  const { error } = await supabase
+    .from("members")
+    .update(patch)
+    .eq("id", memberId);
+  if (error) throw error;
+}
+
 // Payment history for the signed-in user
 export async function fetchMyPayments(userId: string) {
   const { data, error } = await supabase
     .from("payments")
     .select("*")
     .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+// ── Messaging ──────────────────────────────────────────────────────
+
+export interface Message {
+  id: string;
+  admin_id: string;
+  member_id: string;
+  subject: string;
+  content: string;
+  created_at: string;
+  read_at: string | null;
+  admin_name: string;
+  member_name: string;
+}
+
+export async function sendMessageToMember(memberId: string, adminId: string, subject: string, content: string, adminName: string, memberName: string): Promise<void> {
+  const { error } = await supabase
+    .from("messages")
+    .insert({
+      admin_id: adminId,
+      member_id: memberId,
+      subject,
+      content,
+      admin_name: adminName,
+      member_name: memberName,
+      read_at: null,
+    });
+  if (error) throw error;
+}
+
+export async function fetchMemberMessages(memberId: string): Promise<Message[]> {
+  const { data, error } = await supabase
+    .from("messages")
+    .select("*")
+    .eq("member_id", memberId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchAdminMessages(adminId: string): Promise<Message[]> {
+  const { data, error } = await supabase
+    .from("messages")
+    .select("*")
+    .eq("admin_id", adminId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function markMessageAsRead(messageId: string): Promise<void> {
+  const { error } = await supabase
+    .from("messages")
+    .update({ read_at: new Date().toISOString() })
+    .eq("id", messageId);
+  if (error) throw error;
+}
+
+export async function fetchAllMessages(): Promise<Message[]> {
+  const { data, error } = await supabase
+    .from("messages")
+    .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data ?? [];
