@@ -25,6 +25,8 @@ function ProfilePage() {
     artistic_discipline: "",
     province: "",
     city: "",
+    years_experience: "",
+    tpin: "",
     bio: ""
   });
 
@@ -46,6 +48,8 @@ function ProfilePage() {
           artistic_discipline: m.artistic_discipline || "",
           province: m.province || "",
           city: m.city || "",
+          years_experience: m.years_experience?.toString() || "",
+          tpin: m.tpin || "",
           bio: m.bio || ""
         });
       } catch (error) {
@@ -68,7 +72,11 @@ function ProfilePage() {
     
     setSaving(true);
     try {
-      await updateMember(member.id, formData);
+      const updateData = {
+        ...formData,
+        years_experience: formData.years_experience ? parseInt(formData.years_experience) : 0
+      };
+      await updateMember(member.id, updateData);
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       console.error("Error updating profile:", error);
@@ -197,6 +205,36 @@ function ProfilePage() {
                 value={formData.city}
                 onChange={(e) => updateField("city", e.target.value)}
                 placeholder="Lusaka"
+                className="w-full rounded-sm border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brass focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                Years of experience
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="50"
+                value={formData.years_experience}
+                onChange={(e) => updateField("years_experience", e.target.value)}
+                placeholder="5"
+                className="w-full rounded-sm border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brass focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                TPIN (Taxpayer Identification Number)
+              </label>
+              <input
+                type="text"
+                value={formData.tpin}
+                onChange={(e) => updateField("tpin", e.target.value)}
+                placeholder="100000000"
                 className="w-full rounded-sm border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brass focus:border-transparent"
               />
             </div>
