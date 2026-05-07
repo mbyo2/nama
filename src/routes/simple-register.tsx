@@ -26,6 +26,7 @@ function SimpleRegisterPage() {
     artistic_discipline: "",
     province: "",
     city: "",
+    years_experience: "0",
     membership_category_id: ""
   });
 
@@ -59,7 +60,7 @@ function SimpleRegisterPage() {
         artistic_discipline: formData.artistic_discipline,
         province: formData.province,
         city: formData.city,
-        years_experience: 0,
+        years_experience: parseInt(formData.years_experience),
         bio: null,
         institution_name: null,
         membership_category_id: formData.membership_category_id
@@ -181,6 +182,24 @@ function SimpleRegisterPage() {
                   <option value="photographer">Photographer</option>
                   <option value="musician">Musician</option>
                   <option value="broadcaster">Broadcaster</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                  Years of experience
+                </label>
+                <select
+                  value={formData.years_experience}
+                  onChange={(e) => updateField("years_experience", e.target.value)}
+                  className="w-full rounded-sm border border-input bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-brass focus:border-transparent"
+                >
+                  <option value="0">Less than 1 year</option>
+                  <option value="1">1-2 years</option>
+                  <option value="3">3-5 years</option>
+                  <option value="6">6-10 years</option>
+                  <option value="11">11-15 years</option>
+                  <option value="16">16-20 years</option>
+                  <option value="21">More than 20 years</option>
                 </select>
               </div>
               <div>

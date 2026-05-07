@@ -159,19 +159,13 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col sm:flex-row gap-3">
+        <div className="mt-10">
           <Link
             to="/admin"
             className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
           >
             <Crown className="w-4 h-4" />
             Go to admin panel <ArrowRight className="w-4 h-4" />
-          </Link>
-          <Link
-            to="/app/register"
-            className="inline-flex items-center gap-2 rounded-sm border border-border bg-paper text-foreground px-7 py-4 text-sm font-medium hover:bg-card transition-all"
-          >
-            Register as member <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
@@ -202,63 +196,14 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
         ))}
       </div>
 
-      <div className="mt-10 flex flex-col sm:flex-row gap-3">
+      <div className="mt-10">
         <button
           onClick={() => {
-            try {
-              console.log('Begin registration clicked, navigating to /app/register');
-              navigate({ to: "/app/register" });
-            } catch (error) {
-              console.error('Navigation error:', error);
-              // Fallback to window.location
-              window.location.href = '/app/register';
-            }
+            window.location.href = '/simple-register';
           }}
           className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
         >
           Begin registration <ArrowRight className="w-4 h-4" />
-        </button>
-        <Link
-          to="/verify"
-          className="inline-flex items-center gap-2 rounded-sm border border-border bg-paper text-foreground px-7 py-4 text-sm font-medium hover:bg-card transition-all"
-        >
-          Test navigation to verify
-        </Link>
-        <button
-          onClick={() => {
-            console.log('Direct navigate test clicked');
-            navigate({ to: "/app/register" });
-          }}
-          className="inline-flex items-center gap-2 rounded-sm border border-red-500 text-red-500 px-7 py-4 text-sm font-medium hover:bg-red-50 transition-all"
-        >
-          Direct navigate test
-        </button>
-        <button
-          onClick={() => {
-            console.log('Window.location test clicked');
-            window.location.href = '/app/register';
-          }}
-          className="inline-flex items-center gap-2 rounded-sm border border-blue-500 text-blue-500 px-7 py-4 text-sm font-medium hover:bg-blue-50 transition-all"
-        >
-          Window.location test
-        </button>
-        <button
-          onClick={() => {
-            console.log('Simple test page clicked');
-            window.location.href = '/test-register';
-          }}
-          className="inline-flex items-center gap-2 rounded-sm border border-green-500 text-green-500 px-7 py-4 text-sm font-medium hover:bg-green-50 transition-all"
-        >
-          🧪 Simple test page
-        </button>
-        <button
-          onClick={() => {
-            console.log('Simple registration clicked');
-            window.location.href = '/simple-register';
-          }}
-          className="inline-flex items-center gap-2 rounded-sm bg-green-600 text-white px-7 py-4 text-sm font-semibold hover:bg-green-700 transition-all"
-        >
-          🚀 Simple Registration (WORKS)
         </button>
       </div>
     </div>
