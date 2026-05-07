@@ -68,7 +68,7 @@ function SimpleRegisterPage() {
 
       toast.success("Registration submitted successfully!");
       setTimeout(() => {
-        window.location.href = '/app/pay';
+        window.location.href = '/simple-pay';
       }, 2000);
     } catch (error: any) {
       console.error("Registration error:", error);

@@ -254,7 +254,7 @@ function RegisteredView({
           title="Payment pending"
           body={<>Pay your annual {category?.name ?? "membership"} fee
             {category ? <> of <strong className="text-foreground">{formatZmw(category.annual_fee_zmw)}</strong></> : null} to activate your membership and issue your certificate.</>}
-          ctaTo="/app/pay"
+          ctaTo="/simple-pay"
           ctaLabel="Pay now"
         />
       )}
@@ -265,7 +265,7 @@ function RegisteredView({
           icon={RefreshCw}
           title="Membership expired"
           body={<>Your NAMA membership has lapsed{expiresOn ? <> on {expiresOn}</> : null}. Renew now to reactivate your member benefits and reissue your certificate.</>}
-          ctaTo="/app/pay"
+          ctaTo="/simple-pay"
           ctaLabel="Renew now"
         />
       )}
@@ -276,7 +276,7 @@ function RegisteredView({
           icon={Clock}
           title={`Expires in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"}`}
           body={<>Your membership expires on <strong className="text-foreground">{expiresOn}</strong>. Renew early to avoid any interruption.</>}
-          ctaTo="/app/pay"
+          ctaTo="/simple-pay"
           ctaLabel="Renew early"
         />
       )}
@@ -327,26 +327,26 @@ function RegisteredView({
 
       {/* Quick actions */}
       <div className="grid sm:grid-cols-2 gap-3">
-        <Link
-          to="/app/profile"
-          className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors"
+        <button
+          onClick={() => window.location.href = '/simple-profile'}
+          className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <Pencil className="w-4 h-4 text-brass" />
           <div>
             <p className="text-[13px] text-foreground font-medium">Edit profile</p>
             <p className="text-[11px] text-muted-foreground">Update contact details, discipline, bio</p>
           </div>
-        </Link>
-        <Link
-          to="/app/payments"
-          className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors"
+        </button>
+        <button
+          onClick={() => window.location.href = '/simple-payments'}
+          className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <Receipt className="w-4 h-4 text-brass" />
           <div>
             <p className="text-[13px] text-foreground font-medium">Payment history</p>
             <p className="text-[11px] text-muted-foreground">View and print past receipts</p>
           </div>
-        </Link>
+        </button>
       </div>
 
       {/* Profile */}
@@ -380,12 +380,12 @@ function ActionBanner({
         </div>
       </div>
       {ctaTo && ctaLabel && (
-        <Link
-          to={ctaTo}
+        <button
+          onClick={() => window.location.href = ctaTo}
           className={`inline-flex items-center gap-2 rounded-sm ${styles.btn} px-6 py-3.5 text-sm font-semibold transition-all active:scale-[0.98] whitespace-nowrap`}
         >
           {ctaLabel} <ArrowRight className="w-4 h-4" />
-        </Link>
+        </button>
       )}
     </div>
   );
