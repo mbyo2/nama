@@ -242,6 +242,15 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
         >
           Window.location test
         </button>
+        <button
+          onClick={() => {
+            console.log('Simple test page clicked');
+            window.location.href = '/test-register';
+          }}
+          className="inline-flex items-center gap-2 rounded-sm border border-green-500 text-green-500 px-7 py-4 text-sm font-medium hover:bg-green-50 transition-all"
+        >
+          🧪 Simple test page
+        </button>
       </div>
     </div>
   );
