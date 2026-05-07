@@ -60,8 +60,13 @@ function RegisterPage() {
   const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
+    console.log('RegisterPage: authLoading=', authLoading, 'user=', user);
     if (authLoading) return;
-    if (!user) { navigate({ to: "/login" }); return; }
+    if (!user) { 
+      console.log('RegisterPage: No user, redirecting to login');
+      navigate({ to: "/login" }); 
+      return; 
+    }
     let cancelled = false;
     (async () => {
       try {
@@ -159,6 +164,7 @@ function RegisterPage() {
     }
   };
 
+  console.log('RegisterPage: authLoading=', authLoading, 'bootstrapped=', bootstrapped);
   if (authLoading || !bootstrapped) {
     return (
       <div className="min-h-screen bg-paper flex items-center justify-center">

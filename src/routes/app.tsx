@@ -203,6 +203,7 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
       <Link
         to="/app/register"
         className="mt-10 inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
+        onClick={() => console.log('Begin registration clicked, navigating to /app/register')}
       >
         Begin registration <ArrowRight className="w-4 h-4" />
       </Link>
