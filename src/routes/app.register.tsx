@@ -51,6 +51,7 @@ const initial: FormState = {
 const STEPS = ["Identity", "Practice", "Tier"] as const;
 
 function RegisterPage() {
+  console.log('RegisterPage component mounted!');
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);

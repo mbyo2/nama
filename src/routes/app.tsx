@@ -203,13 +203,21 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       <div className="mt-10 flex flex-col sm:flex-row gap-3">
-        <Link
-          to="/app/register"
+        <button
+          onClick={() => {
+            try {
+              console.log('Begin registration clicked, navigating to /app/register');
+              navigate({ to: "/app/register" });
+            } catch (error) {
+              console.error('Navigation error:', error);
+              // Fallback to window.location
+              window.location.href = '/app/register';
+            }
+          }}
           className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
-          onClick={() => console.log('Begin registration clicked, navigating to /app/register')}
         >
           Begin registration <ArrowRight className="w-4 h-4" />
-        </Link>
+        </button>
         <Link
           to="/verify"
           className="inline-flex items-center gap-2 rounded-sm border border-border bg-paper text-foreground px-7 py-4 text-sm font-medium hover:bg-card transition-all"
@@ -224,6 +232,15 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
           className="inline-flex items-center gap-2 rounded-sm border border-red-500 text-red-500 px-7 py-4 text-sm font-medium hover:bg-red-50 transition-all"
         >
           Direct navigate test
+        </button>
+        <button
+          onClick={() => {
+            console.log('Window.location test clicked');
+            window.location.href = '/app/register';
+          }}
+          className="inline-flex items-center gap-2 rounded-sm border border-blue-500 text-blue-500 px-7 py-4 text-sm font-medium hover:bg-blue-50 transition-all"
+        >
+          Window.location test
         </button>
       </div>
     </div>
