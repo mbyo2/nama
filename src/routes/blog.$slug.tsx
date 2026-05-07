@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Calendar, Clock, Loader2, FileText } from "lucide-react";
 import namaLogo from "@/assets/nama-logo.jpg";
-import { fetchBlogPost, type BlogPost } from "@/lib/nama-api";
+import { fetchBlogPost, fetchBlogPosts, type BlogPost } from "@/lib/nama-api";
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
