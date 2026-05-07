@@ -39,7 +39,7 @@ function CertificatePage() {
           fetchCategories(),
         ]);
         if (cancelled) return;
-        if (!m) { navigate({ to: "/app/register" }); return; }
+        if (!m) { navigate({ to: "/register" }); return; }
         if (!cert) { navigate({ to: "/app" }); return; }
         setMember(m);
         setCertificate(cert);
