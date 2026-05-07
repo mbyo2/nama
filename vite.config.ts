@@ -169,6 +169,11 @@ const useNetlify = process.env.NETLIFY === "1";
   const envDefine: Record<string, string> = {};
   for (const [key, value] of Object.entries(env)) {
     envDefine[`import.meta.env.${key}`] = JSON.stringify(value);
+    // Also define non-VITE versions for server-side compatibility
+    if (key.startsWith('VITE_')) {
+      const nonViteKey = key.replace('VITE_', '');
+      envDefine[`process.env.${nonViteKey}`] = JSON.stringify(value);
+    }
   }
 
   return {
