@@ -1,12 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { ArrowLeft, ArrowRight, Calendar, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Calendar, Clock, Loader2, FileText } from "lucide-react";
 import namaLogo from "@/assets/nama-logo.jpg";
-import { BLOG_POSTS, getPostBySlug, type BlogPost } from "@/lib/blog-posts";
+import { fetchBlogPost, type BlogPost } from "@/lib/nama-api";
 
 export const Route = createFileRoute("/blog/$slug")({
-  loader: ({ params }) => {
-    const post = getPostBySlug(params.slug);
+  loader: async ({ params }) => {
+    const post = await fetchBlogPost(params.slug);
     if (!post) throw notFound();
     return { post };
   },
@@ -20,18 +20,18 @@ export const Route = createFileRoute("/blog/$slug")({
       meta: [
         { title: `${post.title} — NAMA` },
         { name: "description", content: post.excerpt },
-        { name: "author", content: post.author },
-        { property: "article:published_time", content: post.date },
-        { property: "article:author", content: post.author },
+        { name: "author", content: post.author_name },
+        { property: "article:published_time", content: post.published_at || post.created_at },
+        { property: "article:author", content: post.author_name },
         { property: "og:type", content: "article" },
         { property: "og:title", content: post.title },
         { property: "og:description", content: post.excerpt },
-        { property: "og:image", content: post.image },
+        { property: "og:image", content: post.featured_image || "" },
         { property: "og:url", content: url },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: post.title },
         { name: "twitter:description", content: post.excerpt },
-        { name: "twitter:image", content: post.image },
+        { name: "twitter:image", content: post.featured_image || "" },
         {
           name: "script:ld+json",
           content: JSON.stringify({
@@ -39,9 +39,9 @@ export const Route = createFileRoute("/blog/$slug")({
             "@type": "NewsArticle",
             headline: post.title,
             description: post.excerpt,
-            image: [post.image],
-            datePublished: post.date,
-            author: [{ "@type": "Person", name: post.author }],
+            image: post.featured_image ? [post.featured_image] : [],
+            datePublished: post.published_at || post.created_at,
+            author: [{ "@type": "Person", name: post.author_name }],
             publisher: {
               "@type": "Organization",
               name: "National Association for Media Arts of Zambia",
@@ -81,7 +81,24 @@ export const Route = createFileRoute("/blog/$slug")({
 
 function BlogPostPage() {
   const { post } = Route.useLoaderData();
-  const others = BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 3);
+  const [others, setOthers] = useState<BlogPost[]>([]);
+  const [loadingOthers, setLoadingOthers] = useState(true);
+
+  useEffect(() => {
+    const loadOthers = async () => {
+      try {
+        const allPosts = await fetchBlogPosts();
+        const filtered = allPosts.filter((p) => p.id !== post.id).slice(0, 3);
+        setOthers(filtered);
+      } catch (error) {
+        console.error("Error loading other posts:", error);
+      } finally {
+        setLoadingOthers(false);
+      }
+    };
+
+    loadOthers();
+  }, [post.id]);
 
   // Scroll to top when article loads
   useEffect(() => {
@@ -114,14 +131,27 @@ function BlogPostPage() {
             {post.title}
           </h1>
           <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-muted-foreground">
-            <span>By <span className="text-foreground">{post.author}</span></span>
-            <span className="inline-flex items-center gap-1.5"><Calendar className="w-3 h-3" />{post.dateLabel}</span>
-            <span className="inline-flex items-center gap-1.5"><Clock className="w-3 h-3" />{post.readMinutes} min read</span>
+            <span>By <span className="text-foreground">{post.author_name}</span></span>
+            <span className="inline-flex items-center gap-1.5">
+              <Calendar className="w-3 h-3" />
+              {new Date(post.published_at || post.created_at).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+              })}
+            </span>
+            <span className="inline-flex items-center gap-1.5"><Clock className="w-3 h-3" />{post.read_minutes} min read</span>
           </div>
         </div>
         <div className="max-w-5xl mx-auto px-6 pb-12">
           <div className="aspect-[16/9] overflow-hidden bg-muted">
-            <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+            {post.featured_image ? (
+              <img src={post.featured_image} alt={post.title} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-brass/10 flex items-center justify-center">
+                <FileText className="w-16 h-16 text-brass/30" />
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -129,7 +159,11 @@ function BlogPostPage() {
       {/* Body */}
       <main className="py-16">
         <article className="max-w-2xl mx-auto px-6">
-          <ArticleBody body={post.body} />
+          <div className="prose prose-lg max-w-none">
+            <div className="whitespace-pre-wrap text-[16px] text-foreground/85 leading-[1.75]">
+              {post.content}
+            </div>
+          </div>
         </article>
       </main>
 
@@ -140,11 +174,17 @@ function BlogPostPage() {
             <h2 className="font-serif text-3xl mb-10">More from the blog</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {others.map((p) => (
-                <Link key={p.slug} to="/blog/$slug" params={{ slug: p.slug }} className="group block">
+                <Link key={p.id} to="/blog/$slug" params={{ slug: p.slug }} className="group block">
                   <div className="aspect-[4/3] overflow-hidden mb-4">
-                    <img src={p.image} alt={p.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700" />
+                    {p.featured_image ? (
+                      <img src={p.featured_image} alt={p.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700" />
+                    ) : (
+                      <div className="w-full h-full bg-brass/10 flex items-center justify-center">
+                        <FileText className="w-8 h-8 text-brass/30" />
+                      </div>
+                    )}
                   </div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-2">By {p.author}</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-2">By {p.author_name}</p>
                   <h3 className="font-serif text-lg text-paper leading-snug group-hover:text-brass transition-colors">{p.title}</h3>
                   <p className="mt-3 text-[12px] text-brass inline-flex items-center gap-1.5">
                     Read <ArrowRight className="w-3 h-3" />

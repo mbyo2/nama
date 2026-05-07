@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import {
   ArrowLeft, Loader2, Users, ShieldAlert, ShieldCheck, UserPlus, UserMinus,
-  Crown, Award, Ban, RefreshCw, Mail, Send,
+  Crown, Award, Ban, RefreshCw, Mail, Send, FileText,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -250,9 +250,14 @@ function AdminPage() {
     <div className="min-h-screen bg-paper text-foreground">
       <header className="border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/app" className="inline-flex items-center gap-2 text-[13px] text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/app" className="inline-flex items-center gap-2 text-[13px] text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
+            </Link>
+            <Link to="/admin-blog" className="inline-flex items-center gap-2 text-[13px] text-brass hover:text-brass/80">
+              <FileText className="w-3.5 h-3.5" /> Blog
+            </Link>
+          </div>
           <p className="text-[11px] uppercase tracking-[0.25em] text-brass">Secretariat</p>
         </div>
       </header>

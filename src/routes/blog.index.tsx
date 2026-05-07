@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Calendar, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, ArrowRight, Calendar, Clock, Loader2, FileText } from "lucide-react";
 import namaLogo from "@/assets/nama-logo.jpg";
-import { BLOG_POSTS } from "@/lib/blog-posts";
+import { fetchBlogPosts, type BlogPost } from "@/lib/nama-api";
 
 export const Route = createFileRoute("/blog/")({
   component: BlogIndex,
@@ -20,15 +21,41 @@ export const Route = createFileRoute("/blog/")({
           "Workshops, policy, film, and the people building Zambia's creative economy — straight from NAMA's national network.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: BLOG_POSTS[0]?.image },
+      { property: "og:image", content: posts[0]?.featured_image || "" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: BLOG_POSTS[0]?.image },
+      { name: "twitter:image", content: posts[0]?.featured_image || "" },
     ],
     links: [{ rel: "canonical", href: "https://nama-zambia.lovable.app/blog" }],
   }),
 });
 
 function BlogIndex() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        const fetchedPosts = await fetchBlogPosts();
+        setPosts(fetchedPosts);
+      } catch (error) {
+        console.error("Error loading blog posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPosts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-paper flex items-center justify-center">
+        <Loader2 className="w-5 h-5 text-brass animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-paper text-foreground">
       {/* Nav */}
@@ -64,25 +91,40 @@ function BlogIndex() {
       <main className="py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {BLOG_POSTS.map((p) => (
-              <article key={p.slug} className="group">
+            {posts.map((p) => (
+              <article key={p.id} className="group">
                 <Link to="/blog/$slug" params={{ slug: p.slug }} className="block">
                   <div className="aspect-[4/3] overflow-hidden bg-muted mb-5">
-                    <img
-                      src={p.image}
-                      alt={p.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-                    />
+                    {p.featured_image ? (
+                      <img
+                        src={p.featured_image}
+                        alt={p.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-brass/10 flex items-center justify-center">
+                        <FileText className="w-12 h-12 text-brass/30" />
+                      </div>
+                    )}
                   </div>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-2">By {p.author}</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-2">By {p.author_name}</p>
                   <h2 className="font-serif text-2xl text-foreground leading-snug mb-3 group-hover:text-brass transition-colors">
                     {p.title}
                   </h2>
                   <p className="text-[14px] text-muted-foreground leading-relaxed line-clamp-3">{p.excerpt}</p>
                   <div className="mt-4 flex items-center gap-4 text-[11px] text-muted-foreground">
-                    <span className="inline-flex items-center gap-1.5"><Calendar className="w-3 h-3" />{p.dateLabel}</span>
-                    <span className="inline-flex items-center gap-1.5"><Clock className="w-3 h-3" />{p.readMinutes} min read</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(p.published_at || p.created_at).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric"
+                      })}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Clock className="w-3 h-3" />{p.read_minutes} min read
+                    </span>
                   </div>
                   <p className="mt-4 text-[12px] text-brass inline-flex items-center gap-1.5">
                     Read article <ArrowRight className="w-3 h-3" />
@@ -90,6 +132,13 @@ function BlogIndex() {
                 </Link>
               </article>
             ))}
+            {posts.length === 0 && (
+              <div className="col-span-full text-center py-20">
+                <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No blog posts yet.</p>
+                <p className="text-sm text-muted-foreground mt-2">Check back soon for updates from NAMA!</p>
+              </div>
+            )}
           </div>
         </div>
       </main>

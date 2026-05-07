@@ -168,6 +168,121 @@ export async function fetchAllMessages(): Promise<Message[]> {
   return data ?? [];
 }
 
+// ── Blog Management ──────────────────────────────────────────────────────
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  author_id: string;
+  author_name: string;
+  content: string;
+  featured_image: string | null;
+  status: 'draft' | 'published' | 'archived';
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+  read_minutes: number;
+}
+
+export interface CreateBlogPostInput {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  featured_image?: string | null;
+  status?: 'draft' | 'published' | 'archived';
+  read_minutes?: number;
+}
+
+export async function createBlogPost(authorId: string, authorName: string, post: CreateBlogPostInput): Promise<BlogPost> {
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .insert({
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt,
+      author_id: authorId,
+      author_name: authorName,
+      content: post.content,
+      featured_image: post.featured_image || null,
+      status: post.status || 'draft',
+      published_at: post.status === 'published' ? new Date().toISOString() : null,
+      read_minutes: post.read_minutes || 5,
+    })
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data as BlogPost;
+}
+
+export async function updateBlogPost(postId: string, updates: Partial<CreateBlogPostInput>): Promise<void> {
+  const updateData: any = { ...updates };
+  
+  // Update published_at if status changes to published
+  if (updates.status === 'published') {
+    updateData.published_at = new Date().toISOString();
+  }
+  
+  const { error } = await supabase
+    .from("blog_posts")
+    .update(updateData)
+    .eq("id", postId);
+  
+  if (error) throw error;
+}
+
+export async function deleteBlogPost(postId: string): Promise<void> {
+  const { error } = await supabase
+    .from("blog_posts")
+    .delete()
+    .eq("id", postId);
+  
+  if (error) throw error;
+}
+
+export async function fetchBlogPosts(status?: 'draft' | 'published' | 'archived'): Promise<BlogPost[]> {
+  let query = supabase
+    .from("blog_posts")
+    .select("*")
+    .order("created_at", { ascending: false });
+  
+  if (status) {
+    query = query.eq("status", status);
+  } else {
+    // For public view, only show published posts
+    query = query.eq("status", "published");
+  }
+  
+  const { data, error } = await query;
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchBlogPost(slug: string): Promise<BlogPost | null> {
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .single();
+  
+  if (error && error.code !== 'PGRST116') throw error; // PGRST116 = not found
+  return data as BlogPost | null;
+}
+
+export async function fetchAdminBlogPosts(): Promise<BlogPost[]> {
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .order("created_at", { ascending: false });
+  
+  if (error) throw error;
+  return data ?? [];
+}
+
 // Admin: revoke a certificate
 export async function adminRevokeCertificate(certificateId: string, reason: string): Promise<void> {
   const { error } = await supabase.rpc("admin_revoke_certificate", {
