@@ -1,10 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import {
   ArrowLeft, Plus, Edit, Trash2, Eye, EyeOff, FileText, Calendar, Clock,
   Loader2, Save, X
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   createBlogPost, 
   updateBlogPost, 
@@ -26,7 +27,9 @@ export const Route = createFileRoute("/admin-blog")({
 });
 
 function AdminBlogPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
@@ -43,8 +46,34 @@ function AdminBlogPage() {
   });
 
   useEffect(() => {
-    loadPosts();
-  }, []);
+    if (authLoading) return;
+    if (!user) {
+      navigate({ to: "/login" });
+      return;
+    }
+
+    const checkAdminRole = async () => {
+      try {
+        const { data: roles } = await supabase
+          .from("user_roles").select("role").eq("user_id", user.id);
+        const myRoles = (roles ?? []).map((r) => r.role);
+        const admin = myRoles.includes("admin") || myRoles.includes("superadmin");
+        
+        if (!admin) {
+          navigate({ to: "/app" });
+          return;
+        }
+        
+        setIsAdmin(admin);
+        loadPosts();
+      } catch (error) {
+        console.error("Error checking admin role:", error);
+        navigate({ to: "/app" });
+      }
+    };
+
+    checkAdminRole();
+  }, [user, authLoading, navigate]);
 
   const loadPosts = async () => {
     try {
@@ -150,7 +179,7 @@ function AdminBlogPage() {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading || isAdmin === null) {
     return (
       <div className="min-h-screen bg-paper flex items-center justify-center">
         <Loader2 className="w-5 h-5 text-brass animate-spin" />

@@ -53,7 +53,7 @@ function DashboardPage() {
         setMember(m);
         setCategories(c);
         setCertificate(cert);
-        setIsAdmin((roles.data ?? []).some((r) => r.role === "admin"));
+        setIsAdmin((roles.data ?? []).some((r) => r.role === "admin" || r.role === "superadmin"));
       } catch (err) {
         console.error(err);
         toast.error("Could not load your dashboard");
