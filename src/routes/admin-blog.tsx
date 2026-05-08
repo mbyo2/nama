@@ -35,6 +35,7 @@ function AdminBlogPage() {
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   const [formData, setFormData] = useState<CreateBlogPostInput>({
     title: "",
     slug: "",
@@ -157,6 +158,11 @@ function AdminBlogPage() {
   const handleCancel = () => {
     setIsCreating(false);
     setEditingPost(null);
+    setIsPreviewing(false);
+  };
+
+  const handlePreview = () => {
+    setIsPreviewing(true);
   };
 
   const updateField = (field: keyof CreateBlogPostInput, value: string | number) => {
@@ -276,7 +282,7 @@ function AdminBlogPage() {
                   <label className="block text-sm font-medium text-foreground mb-2">Featured Image URL</label>
                   <input
                     type="url"
-                    value={formData.featured_image}
+                    value={formData.featured_image ?? ""}
                     onChange={(e) => updateField('featured_image', e.target.value)}
                     placeholder="https://example.com/image.jpg"
                     className="w-full rounded-sm border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brass focus:border-transparent"
@@ -311,6 +317,13 @@ function AdminBlogPage() {
                 </div>
 
                 <div className="pt-6 space-y-3">
+                  <button
+                    onClick={handlePreview}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-paper text-foreground px-6 py-3 text-sm font-medium hover:bg-card"
+                  >
+                    <Eye className="w-4 h-4" />
+                    Preview
+                  </button>
                   <button
                     onClick={handleSave}
                     disabled={saving}
@@ -404,6 +417,40 @@ function AdminBlogPage() {
           </table>
         </div>
       </main>
+
+      {/* Preview Modal */}
+      {isPreviewing && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-paper rounded-sm max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-paper border-b border-border p-4 flex items-center justify-between">
+              <h3 className="font-semibold text-foreground">Preview: {formData.title}</h3>
+              <button
+                onClick={() => setIsPreviewing(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-8">
+              {formData.featured_image && (
+                <img
+                  src={formData.featured_image}
+                  alt={formData.title}
+                  className="w-full aspect-video object-cover rounded-sm mb-8"
+                />
+              )}
+              <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-2">By {user?.email || "Admin"}</p>
+              <h1 className="font-serif text-4xl text-foreground leading-tight mb-4">{formData.title}</h1>
+              <p className="text-lg text-muted-foreground mb-8">{formData.excerpt}</p>
+              <div className="prose prose-lg max-w-none">
+                <div className="whitespace-pre-wrap text-foreground/85 leading-relaxed">
+                  {formData.content}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

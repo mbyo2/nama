@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   ArrowRight, ShieldCheck, Award, Users, FileText, Smartphone,
   CheckCircle2, QrCode, Building2, GraduationCap, Star, Phone, Facebook,
-  Calendar, MapPin, Mail, Target, Eye,
+  Calendar, MapPin, Mail, Target, Eye, Loader2,
 } from "lucide-react";
 import heroBg from "@/assets/nama-hero.jpg";
 import namaLogo from "@/assets/nama-logo.jpg";
@@ -12,7 +12,7 @@ import {
   NATIONAL_EXECUTIVE, UPCOMING_EVENT,
   NAMA_MISSION, NAMA_VISION, NAMA_CONTACT_EMAIL,
 } from "@/lib/nama-content";
-import { BLOG_POSTS } from "@/lib/blog-posts";
+import { fetchBlogPosts, type BlogPost } from "@/lib/nama-api";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
@@ -433,6 +433,24 @@ function Team() {
 
 /* ─── Blog ─── */
 function Blog() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        const fetchedPosts = await fetchBlogPosts();
+        setPosts(fetchedPosts);
+      } catch (error) {
+        console.error("Error loading blog posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPosts();
+  }, []);
+
   return (
     <section id="blog" className="py-28 bg-ink text-paper">
       <div className="max-w-6xl mx-auto px-6">
@@ -448,35 +466,54 @@ function Blog() {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/10">
-          {BLOG_POSTS.slice(0, 3).map((p) => (
-            <Link
-              key={p.slug}
-              to="/blog/$slug"
-              params={{ slug: p.slug }}
-              className="bg-ink hover:bg-[#13110d] transition-colors group flex flex-col"
-            >
-              <div className="aspect-[4/3] overflow-hidden">
-                <img
-                  src={p.image}
-                  alt={p.title}
-                  loading="lazy"
-                  className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-                />
-              </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-3">By {p.author}</p>
-                <h3 className="font-serif text-xl text-paper leading-snug mb-3 group-hover:text-brass transition-colors">
-                  {p.title}
-                </h3>
-                <p className="text-[13px] text-paper/60 leading-relaxed line-clamp-3">{p.excerpt}</p>
-                <p className="mt-5 text-[12px] text-brass inline-flex items-center gap-1.5">
-                  Read article <ArrowRight className="w-3 h-3" />
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 text-brass animate-spin" />
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-20">
+            <FileText className="w-12 h-12 text-brass/30 mx-auto mb-4" />
+            <p className="text-paper/60">No published articles yet.</p>
+            <p className="text-sm text-paper/40 mt-2">Check back soon for insights from Zambia's media arts sector.</p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/10">
+            {posts.slice(0, 3).map((p) => (
+              <Link
+                key={p.id}
+                to="/blog/$slug"
+                params={{ slug: p.slug }}
+                className="bg-ink hover:bg-[#13110d] transition-colors group flex flex-col"
+              >
+                <div className="aspect-[4/3] overflow-hidden">
+                  {p.featured_image ? (
+                    <img
+                      src={p.featured_image}
+                      alt={p.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-brass/10 flex items-center justify-center">
+                      <FileText className="w-8 h-8 text-brass/30" />
+                    </div>
+                  )}
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-3">By {p.author_name}</p>
+                  <h3 className="font-serif text-xl text-paper leading-snug mb-3 group-hover:text-brass transition-colors">
+                    {p.title}
+                  </h3>
+                  <p className="text-[13px] text-paper/60 leading-relaxed line-clamp-3">{p.excerpt}</p>
+                  <p className="mt-5 text-[12px] text-brass inline-flex items-center gap-1.5">
+                    Read article <ArrowRight className="w-3 h-3" />
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
         <div className="mt-12 text-center">
           <Link to="/blog" className="inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.25em] text-brass hover:text-paper transition-colors">
             View all articles <ArrowRight className="w-3.5 h-3.5" />
