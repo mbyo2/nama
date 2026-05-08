@@ -77,6 +77,15 @@ function CertificatePage() {
   const issued = new Date(certificate.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   const expires = new Date(certificate.expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
+  const handlePrint = () => {
+    try {
+      window.print();
+    } catch (error) {
+      console.error("Print failed:", error);
+      toast.error("Could not open print dialog. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-paper text-foreground">
       {/* Header — hidden on print */}
@@ -86,7 +95,7 @@ function CertificatePage() {
             <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
           </Link>
           <button
-            onClick={() => window.print()}
+            onClick={handlePrint}
             className="inline-flex items-center gap-2 rounded-sm bg-foreground text-paper px-5 py-2.5 text-[13px] font-semibold hover:bg-foreground/90"
           >
             <Download className="w-3.5 h-3.5" /> Print / Save PDF
@@ -182,7 +191,13 @@ function CertificatePage() {
       <style>{`
         @media print {
           body { background: white !important; }
-          @page { size: A4 landscape; margin: 12mm; }
+          @page { size: A4 landscape; margin: 0; }
+          .min-h-screen { min-height: auto !important; }
+          .max-w-4xl { max-width: 100% !important; }
+          .px-6 { padding-left: 0 !important; padding-right: 0 !important; }
+          .py-10 { padding-top: 0 !important; padding-bottom: 0 !important; }
+          .shadow-\\[0_30px_80px_-30px_rgba\\(0\\,0\\,0\\,0\\.25\\)\\] { box-shadow: none !important; }
+          .border-ink\\/15 { border: none !important; }
         }
       `}</style>
     </div>
