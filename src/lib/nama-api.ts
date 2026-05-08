@@ -138,7 +138,7 @@ export async function fetchMemberMessages(memberId: string): Promise<Message[]> 
     .eq("member_id", memberId)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as Message[];
 }
 
 export async function fetchAdminMessages(adminId: string): Promise<Message[]> {
@@ -148,7 +148,7 @@ export async function fetchAdminMessages(adminId: string): Promise<Message[]> {
     .eq("admin_id", adminId)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as Message[];
 }
 
 export async function markMessageAsRead(messageId: string): Promise<void> {
@@ -165,7 +165,7 @@ export async function fetchAllMessages(): Promise<Message[]> {
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as Message[];
 }
 
 // ── Blog Management ──────────────────────────────────────────────────────
@@ -215,7 +215,7 @@ export async function createBlogPost(authorId: string, authorName: string, post:
     .single();
   
   if (error) throw error;
-  return data as BlogPost;
+  return data as unknown as BlogPost;
 }
 
 export async function updateBlogPost(postId: string, updates: Partial<CreateBlogPostInput>): Promise<void> {
@@ -258,7 +258,7 @@ export async function fetchBlogPosts(status?: 'draft' | 'published' | 'archived'
   
   const { data, error } = await query;
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as BlogPost[];
 }
 
 export async function fetchBlogPost(slug: string): Promise<BlogPost | null> {
@@ -280,7 +280,7 @@ export async function fetchAdminBlogPosts(): Promise<BlogPost[]> {
     .order("created_at", { ascending: false });
   
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as BlogPost[];
 }
 
 // Admin: revoke a certificate
