@@ -39,14 +39,23 @@ function CertificatePage() {
           fetchCategories(),
         ]);
         if (cancelled) return;
-        if (!m) { navigate({ to: "/register" }); return; }
-        if (!cert) { navigate({ to: "/app" }); return; }
+        if (!m) { 
+          toast.error("Please complete your registration first");
+          navigate({ to: "/register" }); 
+          return; 
+        }
+        if (!cert) { 
+          toast.error("No certificate found. Please complete your payment to receive your certificate.");
+          navigate({ to: "/pay" }); 
+          return; 
+        }
         setMember(m);
         setCertificate(cert);
         setCategory(cats.find((c) => c.id === m.membership_category_id) ?? null);
       } catch (e) {
         console.error(e);
-        toast.error("Could not load your certificate");
+        toast.error("Could not load your certificate. Please try again.");
+        navigate({ to: "/app" });
       } finally {
         if (!cancelled) setBootstrapped(true);
       }
