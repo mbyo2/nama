@@ -391,10 +391,15 @@ export async function issueCertificate(opts: {
       certificate_number: generateCertificateNumber(),
       verification_token: generateVerificationToken(),
       expires_at: opts.expiresAt,
+      revoked: false,
     })
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    console.error("Certificate insertion error:", error);
+    throw error;
+  }
+  console.log("Certificate created:", data);
   return data as Certificate;
 }
 

@@ -89,11 +89,18 @@ function PayPage() {
       // Issue certificate
       const expires = new Date();
       expires.setFullYear(expires.getFullYear() + 1);
-      await issueCertificate({
-        userId: user.id,
-        memberId: member.id,
-        expiresAt: expires.toISOString(),
-      });
+      try {
+        const certificate = await issueCertificate({
+          userId: user.id,
+          memberId: member.id,
+          expiresAt: expires.toISOString(),
+        });
+        console.log("Certificate issued successfully:", certificate);
+      } catch (certError: any) {
+        console.error("Certificate issuance failed:", certError);
+        toast.error("Payment successful but certificate issuance failed. Please contact support.");
+        throw certError;
+      }
 
       setSuccess(true);
       toast.success("Payment completed successfully!");
