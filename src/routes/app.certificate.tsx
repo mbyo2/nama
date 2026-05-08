@@ -70,7 +70,26 @@ function CertificatePage() {
       </div>
     );
   }
-  if (!member || !certificate) return null;
+
+  if (!member || !certificate) {
+    return (
+      <div className="min-h-screen bg-paper flex items-center justify-center px-6">
+        <div className="text-center max-w-md">
+          <ShieldCheck className="w-16 h-16 text-brass/30 mx-auto mb-6" />
+          <h1 className="text-2xl font-serif text-foreground mb-4">Certificate Not Found</h1>
+          <p className="text-muted-foreground mb-8">
+            {!member ? "Please complete your registration first." : "No certificate has been issued yet. Please complete your payment to receive your certificate."}
+          </p>
+          <button
+            onClick={() => window.location.href = !member ? '/register' : '/pay'}
+            className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90"
+          >
+            {!member ? 'Complete Registration' : 'Complete Payment'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const verifyUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/verify?token=${certificate.verification_token}`;
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=${encodeURIComponent(verifyUrl)}`;
