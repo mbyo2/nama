@@ -33,27 +33,34 @@ function CertificatePage() {
     let cancelled = false;
     (async () => {
       try {
+        console.log("Certificate page: Loading data for user:", user.id);
         const [m, cert, cats] = await Promise.all([
           fetchMyMember(user.id),
           fetchMyCertificate(user.id),
           fetchCategories(),
         ]);
         if (cancelled) return;
-        if (!m) { 
+        console.log("Certificate page: Member data:", m);
+        console.log("Certificate page: Certificate data:", cert);
+        console.log("Certificate page: Categories:", cats);
+        if (!m) {
+          console.log("Certificate page: No member found");
           toast.error("Please complete your registration first");
-          navigate({ to: "/register" }); 
-          return; 
+          navigate({ to: "/register" });
+          return;
         }
-        if (!cert) { 
+        if (!cert) {
+          console.log("Certificate page: No certificate found");
           toast.error("No certificate found. Please complete your payment to receive your certificate.");
-          navigate({ to: "/pay" }); 
-          return; 
+          navigate({ to: "/pay" });
+          return;
         }
         setMember(m);
         setCertificate(cert);
         setCategory(cats.find((c) => c.id === m.membership_category_id) ?? null);
+        console.log("Certificate page: All data loaded successfully");
       } catch (e) {
-        console.error(e);
+        console.error("Certificate page: Error loading data:", e);
         toast.error("Could not load your certificate. Please try again.");
         navigate({ to: "/app" });
       } finally {

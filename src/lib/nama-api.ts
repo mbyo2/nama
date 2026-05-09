@@ -366,6 +366,7 @@ export async function activateMembership(memberId: string): Promise<void> {
 // ── Certificates ──────────────────────────────────────────────────
 
 export async function fetchMyCertificate(userId: string): Promise<Certificate | null> {
+  console.log("Fetching certificate for user:", userId);
   const { data, error } = await supabase
     .from("certificates")
     .select("*")
@@ -374,7 +375,11 @@ export async function fetchMyCertificate(userId: string): Promise<Certificate | 
     .order("issued_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (error) throw error;
+  if (error) {
+    console.error("Certificate fetch error:", error);
+    throw error;
+  }
+  console.log("Certificate data:", data);
   return data as Certificate | null;
 }
 
