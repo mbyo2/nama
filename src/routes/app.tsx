@@ -158,13 +158,25 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
           ))}
         </div>
 
-        <div className="mt-10">
+        <div className="mt-10 flex flex-col sm:flex-row gap-3">
           <Link
             to="/admin"
             className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
           >
             <Crown className="w-4 h-4" />
             Go to admin panel <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link
+            to="/admin-blog"
+            className="inline-flex items-center gap-2 rounded-sm border border-border bg-paper text-foreground px-7 py-4 text-sm font-semibold hover:bg-card transition-all active:scale-[0.98]"
+          >
+            <FileText className="w-4 h-4" /> Manage blog
+          </Link>
+          <Link
+            to="/register"
+            className="inline-flex items-center gap-2 rounded-sm border border-border bg-paper text-foreground px-7 py-4 text-sm font-semibold hover:bg-card transition-all active:scale-[0.98]"
+          >
+            <User className="w-4 h-4" /> Register as member
           </Link>
         </div>
       </div>
