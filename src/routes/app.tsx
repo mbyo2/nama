@@ -393,7 +393,7 @@ function ActionBanner({
   icon: typeof Clock;
   title: string;
   body: React.ReactNode;
-  ctaTo?: "/app/pay";
+  ctaTo?: string;
   ctaLabel?: string;
 }) {
   const styles = tone === "brass"
