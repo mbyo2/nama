@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      blog_posts: {
+        Row: {
+          author_id: string
+          author_name: string
+          content: string
+          created_at: string | null
+          excerpt: string
+          featured_image: string | null
+          id: string
+          published_at: string | null
+          read_minutes: number | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          author_name: string
+          content: string
+          created_at?: string | null
+          excerpt: string
+          featured_image?: string | null
+          id?: string
+          published_at?: string | null
+          read_minutes?: number | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          author_name?: string
+          content?: string
+          created_at?: string | null
+          excerpt?: string
+          featured_image?: string | null
+          id?: string
+          published_at?: string | null
+          read_minutes?: number | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_number: string
@@ -162,6 +210,42 @@ export type Database = {
           name?: string
           requires_institution?: boolean
           sort_order?: number
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          admin_id: string
+          admin_name: string
+          content: string
+          created_at: string | null
+          id: string
+          member_id: string
+          member_name: string
+          read_at: string | null
+          subject: string
+        }
+        Insert: {
+          admin_id: string
+          admin_name: string
+          content: string
+          created_at?: string | null
+          id?: string
+          member_id: string
+          member_name: string
+          read_at?: string | null
+          subject: string
+        }
+        Update: {
+          admin_id?: string
+          admin_name?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          member_id?: string
+          member_name?: string
+          read_at?: string | null
+          subject?: string
         }
         Relationships: []
       }
