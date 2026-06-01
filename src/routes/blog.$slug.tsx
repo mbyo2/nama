@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Calendar, Clock, Loader2, FileText } from "lucide-react";
 import namaLogo from "@/assets/nama-logo.jpg";
