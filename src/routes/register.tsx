@@ -69,8 +69,8 @@ function RegisterPage() {
 
       toast.success("Registration submitted successfully!");
       setTimeout(() => {
-        window.location.href = '/pay';
-      }, 2000);
+        navigate({ to: "/pay" });
+      }, 1200);
     } catch (error: any) {
       console.error("Registration error:", error);
       toast.error(error.message || "Registration failed. Please try again.");
