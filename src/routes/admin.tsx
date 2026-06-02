@@ -2,13 +2,13 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import {
   ArrowLeft, Loader2, Users, ShieldAlert, ShieldCheck, UserPlus, UserMinus,
-  Crown, Award, Ban, RefreshCw, Mail, Send, FileText,
+  Crown, Award, Ban, RefreshCw, Mail, Send, FileText, ScrollText,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { membershipStatusLabel, formatZmw } from "@/lib/nama";
 import type { Member, MembershipStatus } from "@/lib/nama";
-import { adminRevokeCertificate, adminIssueCertificate, sendMessageToMember, fetchAdminMessages } from "@/lib/nama-api";
+import { adminRevokeCertificate, adminIssueCertificate, sendMessageToMember, fetchAdminMessages, fetchAuditLogs, type AuditLogEntry } from "@/lib/nama-api";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
