@@ -15,7 +15,7 @@ function HelpPage() {
     <div className="min-h-screen bg-paper text-foreground">
       <div className="max-w-4xl mx-auto px-6 py-12">
         <button
-          onClick={() => window.location.href = '/app'}
+          onClick={() => navigate({ to: "/app" })}
           className="inline-flex items-center gap-2 text-[12px] text-muted-foreground hover:text-foreground mb-8"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
@@ -164,19 +164,19 @@ function HelpPage() {
                 <h3 className="font-semibold text-foreground mb-3">Quick Links</h3>
                 <div className="space-y-2">
                   <button
-                    onClick={() => window.location.href = '/register'}
+                    onClick={() => navigate({ to: "/register" })}
                     className="block w-full text-left text-sm text-brass hover:text-brass/80"
                   >
                     → Register as Member
                   </button>
                   <button
-                    onClick={() => window.location.href = '/verify'}
+                    onClick={() => navigate({ to: "/verify" })}
                     className="block w-full text-left text-sm text-brass hover:text-brass/80"
                   >
                     → Verify Membership
                   </button>
                   <button
-                    onClick={() => window.location.href = '/app'}
+                    onClick={() => navigate({ to: "/app" })}
                     className="block w-full text-left text-sm text-brass hover:text-brass/80"
                   >
                     → Member Dashboard

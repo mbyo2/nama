@@ -36,7 +36,7 @@ function PayPage() {
         ]);
         
         if (!m) {
-          window.location.href = '/register';
+          navigate({ to: "/register" });
           return;
         }
         
@@ -134,7 +134,7 @@ function PayPage() {
             Your membership is now active and your certificate has been issued.
           </p>
           <button
-            onClick={() => window.location.href = '/app'}
+            onClick={() => navigate({ to: "/app" })}
             className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90"
           >
             Go to Dashboard
@@ -150,7 +150,7 @@ function PayPage() {
         <div className="text-center">
           <p className="text-muted-foreground">Member information not found</p>
           <button
-            onClick={() => window.location.href = '/app'}
+            onClick={() => navigate({ to: "/app" })}
             className="mt-4 text-brass hover:text-brass/80"
           >
             Back to Dashboard
@@ -164,7 +164,7 @@ function PayPage() {
     <div className="min-h-screen bg-paper text-foreground">
       <div className="max-w-xl mx-auto px-6 py-12">
         <button
-          onClick={() => window.location.href = '/app'}
+          onClick={() => navigate({ to: "/app" })}
           className="inline-flex items-center gap-2 text-[12px] text-muted-foreground hover:text-foreground mb-8"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
