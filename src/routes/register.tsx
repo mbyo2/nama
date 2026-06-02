@@ -16,6 +16,7 @@ export const Route = createFileRoute("/register")({
 
 function RegisterPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
