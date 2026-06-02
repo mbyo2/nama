@@ -38,6 +38,7 @@ function AdminPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [admins, setAdmins] = useState<AdminEntry[]>([]);
   const [certs, setCerts] = useState<CertRow[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [summary, setSummary] = useState<PaymentSummary>({ total_paid: 0, total_records: 0 });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
