@@ -209,9 +209,7 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
 
       <div className="mt-10">
         <button
-          onClick={() => {
-            window.location.href = '/register';
-          }}
+          onClick={() => navigate({ to: "/register" })}
           className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
         >
           Begin registration <ArrowRight className="w-4 h-4" />
