@@ -542,6 +542,13 @@ function AdminPage() {
   );
 }
 
+function auditDetail(details: Record<string, unknown>): string {
+  if (!details || typeof details !== "object") return "—";
+  const entries = Object.entries(details).filter(([, v]) => v !== null && v !== undefined && v !== "");
+  if (entries.length === 0) return "—";
+  return entries.map(([k, v]) => `${k}: ${String(v)}`).join(" · ");
+}
+
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="bg-paper p-5">
