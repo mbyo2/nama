@@ -433,7 +433,7 @@ function ActionBanner({
   icon: typeof Clock;
   title: string;
   body: React.ReactNode;
-  ctaTo?: string;
+  ctaTo?: "/pay";
   ctaLabel?: string;
 }) {
   const styles = tone === "brass"
@@ -451,12 +451,12 @@ function ActionBanner({
         </div>
       </div>
       {ctaTo && ctaLabel && (
-        <button
-          onClick={() => window.location.href = ctaTo}
+        <Link
+          to={ctaTo}
           className={`inline-flex items-center gap-2 rounded-sm ${styles.btn} px-6 py-3.5 text-sm font-semibold transition-all active:scale-[0.98] whitespace-nowrap`}
         >
           {ctaLabel} <ArrowRight className="w-4 h-4" />
-        </button>
+        </Link>
       )}
     </div>
   );
