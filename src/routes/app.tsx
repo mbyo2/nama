@@ -222,12 +222,14 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
 
 /* ── Registered view ── */
 function RegisteredView({
-  member, category, certificate,
+  member, category, certificate, isAdmin,
 }: {
   member: Member;
   category: MembershipCategory | null;
   certificate: Certificate | null;
+  isAdmin: boolean;
 }) {
+  const navigate = useNavigate();
   const isActive = member.status === "active";
   const isPending = member.status === "pending";
   const isExpired = member.status === "expired";
