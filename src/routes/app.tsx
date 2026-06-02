@@ -91,6 +91,7 @@ function DashboardPage() {
             member={member}
             category={category ?? null}
             certificate={certificate}
+            isAdmin={isAdmin}
           />
         )}
       </main>
