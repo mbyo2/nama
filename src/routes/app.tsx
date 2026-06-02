@@ -337,10 +337,49 @@ function RegisteredView({
         </div>
       )}
 
+      {/* Admin entry points */}
+      {isAdmin && (
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass mb-4">— Administration</p>
+          <div className="grid sm:grid-cols-3 gap-3">
+            <Link
+              to="/admin"
+              className="flex items-center gap-3 rounded-sm border border-brass/40 bg-brass/5 p-4 hover:bg-brass/10 transition-colors text-left"
+            >
+              <Crown className="w-4 h-4 text-brass" />
+              <div>
+                <p className="text-[13px] text-foreground font-medium">Admin panel</p>
+                <p className="text-[11px] text-muted-foreground">Members, roles, certificates, audit log</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin-blog"
+              className="flex items-center gap-3 rounded-sm border border-brass/40 bg-brass/5 p-4 hover:bg-brass/10 transition-colors text-left"
+            >
+              <FileText className="w-4 h-4 text-brass" />
+              <div>
+                <p className="text-[13px] text-foreground font-medium">Manage blog</p>
+                <p className="text-[11px] text-muted-foreground">Create, publish & archive articles</p>
+              </div>
+            </Link>
+            <Link
+              to="/register"
+              className="flex items-center gap-3 rounded-sm border border-brass/40 bg-brass/5 p-4 hover:bg-brass/10 transition-colors text-left"
+            >
+              <UserPlus className="w-4 h-4 text-brass" />
+              <div>
+                <p className="text-[13px] text-foreground font-medium">Register a member</p>
+                <p className="text-[11px] text-muted-foreground">Add a new membership record</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Quick actions */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <button
-          onClick={() => window.location.href = '/profile'}
+          onClick={() => navigate({ to: "/profile" })}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <Pencil className="w-4 h-4 text-brass" />
@@ -350,7 +389,7 @@ function RegisteredView({
           </div>
         </button>
         <button
-          onClick={() => window.location.href = '/payments'}
+          onClick={() => navigate({ to: "/payments" })}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <Receipt className="w-4 h-4 text-brass" />
@@ -360,7 +399,7 @@ function RegisteredView({
           </div>
         </button>
         <button
-          onClick={() => window.location.href = '/messages'}
+          onClick={() => navigate({ to: "/messages" })}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <FileText className="w-4 h-4 text-brass" />
@@ -370,7 +409,7 @@ function RegisteredView({
           </div>
         </button>
         <button
-          onClick={() => window.location.href = '/help'}
+          onClick={() => navigate({ to: "/help" })}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <HelpCircle className="w-4 h-4 text-brass" />
