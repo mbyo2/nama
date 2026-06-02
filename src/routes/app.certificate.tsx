@@ -88,7 +88,7 @@ function CertificatePage() {
             {!member ? "Please complete your registration first." : "No certificate has been issued yet. Please complete your payment to receive your certificate."}
           </p>
           <button
-            onClick={() => window.location.href = !member ? '/register' : '/pay'}
+            onClick={() => navigate({ to: member ? "/pay" : "/register" })}
             className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90"
           >
             {!member ? 'Complete Registration' : 'Complete Payment'}

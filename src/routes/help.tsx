@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Mail, Phone, MapPin, Clock, HelpCircle, Users, CreditCard, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/help")({

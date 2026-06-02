@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Loader2, Mail, MailOpen, Send, Clock } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";

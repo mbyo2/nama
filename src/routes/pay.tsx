@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Smartphone, Loader2, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
