@@ -17,6 +17,7 @@ export const Route = createFileRoute("/payments")({
 
 function PaymentsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

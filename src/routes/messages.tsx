@@ -16,6 +16,7 @@ export const Route = createFileRoute("/messages")({
 
 function MessagesPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [member, setMember] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

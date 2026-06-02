@@ -17,6 +17,7 @@ export const Route = createFileRoute("/pay")({
 
 function PayPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [member, setMember] = useState<any>(null);
   const [category, setCategory] = useState<any>(null);
   const [phone, setPhone] = useState("");
