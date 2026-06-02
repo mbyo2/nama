@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import React, { useState } from "react";
 import { ArrowLeft, ArrowRight, User, ShieldCheck, FileText, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/register")({
 
 function RegisterPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
@@ -68,8 +69,8 @@ function RegisterPage() {
 
       toast.success("Registration submitted successfully!");
       setTimeout(() => {
-        window.location.href = '/pay';
-      }, 2000);
+        navigate({ to: "/pay" });
+      }, 1200);
     } catch (error: any) {
       console.error("Registration error:", error);
       toast.error(error.message || "Registration failed. Please try again.");
@@ -88,7 +89,7 @@ function RegisterPage() {
     <div className="min-h-screen bg-paper text-foreground">
       <div className="max-w-2xl mx-auto px-6 py-12">
         <button
-          onClick={() => window.location.href = '/app'}
+          onClick={() => navigate({ to: "/app" })}
           className="inline-flex items-center gap-2 text-[12px] text-muted-foreground hover:text-foreground mb-8"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard

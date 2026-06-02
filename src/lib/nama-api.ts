@@ -524,3 +524,27 @@ export async function getPublicMemberRegistry(): Promise<Array<{
     expires_at: string;
   }>;
 }
+
+// ── Audit log ──────────────────────────────────────────────────────
+
+export interface AuditLogEntry {
+  id: string;
+  actor_id: string | null;
+  actor_email: string | null;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  details: Record<string, unknown>;
+  created_at: string;
+}
+
+// Admins/superadmins only (enforced by RLS).
+export async function fetchAuditLogs(limit = 100): Promise<AuditLogEntry[]> {
+  const { data, error } = await supabase
+    .from("audit_logs")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as unknown as AuditLogEntry[];
+}

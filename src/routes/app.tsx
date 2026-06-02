@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ArrowRight, ShieldCheck, FileText, Clock, AlertCircle, LogOut,
-  QrCode, User, Users, Phone, Building2, MapPin, Sparkles, Crown, RefreshCw, Pencil, Receipt, HelpCircle,
+  QrCode, User, Users, Phone, Building2, MapPin, Sparkles, Crown, RefreshCw, Pencil, Receipt, HelpCircle, UserPlus,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,6 +91,7 @@ function DashboardPage() {
             member={member}
             category={category ?? null}
             certificate={certificate}
+            isAdmin={isAdmin}
           />
         )}
       </main>
@@ -209,9 +210,7 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
 
       <div className="mt-10">
         <button
-          onClick={() => {
-            window.location.href = '/register';
-          }}
+          onClick={() => navigate({ to: "/register" })}
           className="inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-7 py-4 text-sm font-semibold hover:bg-brass/90 transition-all active:scale-[0.98]"
         >
           Begin registration <ArrowRight className="w-4 h-4" />
@@ -223,12 +222,14 @@ function NotRegistered({ isAdmin }: { isAdmin: boolean }) {
 
 /* ── Registered view ── */
 function RegisteredView({
-  member, category, certificate,
+  member, category, certificate, isAdmin,
 }: {
   member: Member;
   category: MembershipCategory | null;
   certificate: Certificate | null;
+  isAdmin: boolean;
 }) {
+  const navigate = useNavigate();
   const isActive = member.status === "active";
   const isPending = member.status === "pending";
   const isExpired = member.status === "expired";
@@ -336,10 +337,49 @@ function RegisteredView({
         </div>
       )}
 
+      {/* Admin entry points */}
+      {isAdmin && (
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-brass mb-4">— Administration</p>
+          <div className="grid sm:grid-cols-3 gap-3">
+            <Link
+              to="/admin"
+              className="flex items-center gap-3 rounded-sm border border-brass/40 bg-brass/5 p-4 hover:bg-brass/10 transition-colors text-left"
+            >
+              <Crown className="w-4 h-4 text-brass" />
+              <div>
+                <p className="text-[13px] text-foreground font-medium">Admin panel</p>
+                <p className="text-[11px] text-muted-foreground">Members, roles, certificates, audit log</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin-blog"
+              className="flex items-center gap-3 rounded-sm border border-brass/40 bg-brass/5 p-4 hover:bg-brass/10 transition-colors text-left"
+            >
+              <FileText className="w-4 h-4 text-brass" />
+              <div>
+                <p className="text-[13px] text-foreground font-medium">Manage blog</p>
+                <p className="text-[11px] text-muted-foreground">Create, publish & archive articles</p>
+              </div>
+            </Link>
+            <Link
+              to="/register"
+              className="flex items-center gap-3 rounded-sm border border-brass/40 bg-brass/5 p-4 hover:bg-brass/10 transition-colors text-left"
+            >
+              <UserPlus className="w-4 h-4 text-brass" />
+              <div>
+                <p className="text-[13px] text-foreground font-medium">Register a member</p>
+                <p className="text-[11px] text-muted-foreground">Add a new membership record</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Quick actions */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <button
-          onClick={() => window.location.href = '/profile'}
+          onClick={() => navigate({ to: "/profile" })}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <Pencil className="w-4 h-4 text-brass" />
@@ -349,7 +389,7 @@ function RegisteredView({
           </div>
         </button>
         <button
-          onClick={() => window.location.href = '/payments'}
+          onClick={() => navigate({ to: "/payments" })}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <Receipt className="w-4 h-4 text-brass" />
@@ -359,7 +399,7 @@ function RegisteredView({
           </div>
         </button>
         <button
-          onClick={() => window.location.href = '/messages'}
+          onClick={() => navigate({ to: "/messages" })}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <FileText className="w-4 h-4 text-brass" />
@@ -369,7 +409,7 @@ function RegisteredView({
           </div>
         </button>
         <button
-          onClick={() => window.location.href = '/help'}
+          onClick={() => navigate({ to: "/help" })}
           className="flex items-center gap-3 rounded-sm border border-border bg-paper p-4 hover:bg-card transition-colors text-left"
         >
           <HelpCircle className="w-4 h-4 text-brass" />
@@ -393,7 +433,7 @@ function ActionBanner({
   icon: typeof Clock;
   title: string;
   body: React.ReactNode;
-  ctaTo?: string;
+  ctaTo?: "/pay";
   ctaLabel?: string;
 }) {
   const styles = tone === "brass"
@@ -411,12 +451,12 @@ function ActionBanner({
         </div>
       </div>
       {ctaTo && ctaLabel && (
-        <button
-          onClick={() => window.location.href = ctaTo}
+        <Link
+          to={ctaTo}
           className={`inline-flex items-center gap-2 rounded-sm ${styles.btn} px-6 py-3.5 text-sm font-semibold transition-all active:scale-[0.98] whitespace-nowrap`}
         >
           {ctaLabel} <ArrowRight className="w-4 h-4" />
-        </button>
+        </Link>
       )}
     </div>
   );

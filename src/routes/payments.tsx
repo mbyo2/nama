@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Loader2, Receipt, Calendar, DollarSign } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/payments")({
 
 function PaymentsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +51,7 @@ function PaymentsPage() {
     <div className="min-h-screen bg-paper text-foreground">
       <div className="max-w-4xl mx-auto px-6 py-12">
         <button
-          onClick={() => window.location.href = '/app'}
+          onClick={() => navigate({ to: "/app" })}
           className="inline-flex items-center gap-2 text-[12px] text-muted-foreground hover:text-foreground mb-8"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
@@ -66,7 +67,7 @@ function PaymentsPage() {
             <Receipt className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">No payment records found</p>
             <button
-              onClick={() => window.location.href = '/pay'}
+              onClick={() => navigate({ to: "/pay" })}
               className="mt-4 inline-flex items-center gap-2 rounded-sm bg-brass text-ink px-6 py-3 text-sm font-semibold hover:bg-brass/90"
             >
               Make a Payment

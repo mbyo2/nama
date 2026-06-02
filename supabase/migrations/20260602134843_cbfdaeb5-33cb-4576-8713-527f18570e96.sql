@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.log_audit(text, text, text, jsonb) FROM PUBLIC, anon, authenticated;

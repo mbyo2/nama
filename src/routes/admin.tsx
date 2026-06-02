@@ -2,13 +2,13 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import {
   ArrowLeft, Loader2, Users, ShieldAlert, ShieldCheck, UserPlus, UserMinus,
-  Crown, Award, Ban, RefreshCw, Mail, Send, FileText,
+  Crown, Award, Ban, RefreshCw, Mail, Send, FileText, ScrollText,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { membershipStatusLabel, formatZmw } from "@/lib/nama";
 import type { Member, MembershipStatus } from "@/lib/nama";
-import { adminRevokeCertificate, adminIssueCertificate, sendMessageToMember, fetchAdminMessages } from "@/lib/nama-api";
+import { adminRevokeCertificate, adminIssueCertificate, sendMessageToMember, fetchAdminMessages, fetchAuditLogs, type AuditLogEntry } from "@/lib/nama-api";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -38,6 +38,7 @@ function AdminPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [admins, setAdmins] = useState<AdminEntry[]>([]);
   const [certs, setCerts] = useState<CertRow[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [summary, setSummary] = useState<PaymentSummary>({ total_paid: 0, total_records: 0 });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -62,15 +63,17 @@ function AdminPage() {
 
     if (!admin) { setLoading(false); return; }
 
-    const [{ data: m }, { data: p }, { data: a }, { data: c }] = await Promise.all([
+    const [{ data: m }, { data: p }, { data: a }, { data: c }, logs] = await Promise.all([
       supabase.from("members").select("*").order("created_at", { ascending: false }),
       supabase.from("payments").select("amount_zmw,status"),
       supabase.rpc("list_admins"),
       supabase.from("certificates").select("id,member_id,user_id,certificate_number,revoked,revoke_reason,expires_at").order("issued_at", { ascending: false }),
+      fetchAuditLogs(100).catch(() => []),
     ]);
     setMembers((m ?? []) as Member[]);
     setAdmins((a ?? []) as AdminEntry[]);
     setCerts((c ?? []) as CertRow[]);
+    setAuditLogs(logs as AuditLogEntry[]);
     const paid = (p ?? []).filter((x) => x.status === "success");
     setSummary({
       total_paid: paid.reduce((s, x) => s + (x.amount_zmw ?? 0), 0),
@@ -438,6 +441,50 @@ function AdminPage() {
             </table>
           </div>
         </section>
+
+        {/* Audit log */}
+        <section className="mt-14">
+          <div className="flex items-center gap-2">
+            <ScrollText className="w-4 h-4 text-brass" />
+            <p className="text-[11px] uppercase tracking-[0.25em] text-brass">Audit log ({auditLogs.length})</p>
+          </div>
+          <p className="mt-2 text-[12px] text-muted-foreground">
+            Records of role changes, blog publishing, and certificate events — newest first.
+          </p>
+          <div className="mt-4 border border-border bg-card overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead className="bg-paper text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                <tr>
+                  <th className="text-left font-medium px-4 py-3">When</th>
+                  <th className="text-left font-medium px-4 py-3">Actor</th>
+                  <th className="text-left font-medium px-4 py-3">Action</th>
+                  <th className="text-left font-medium px-4 py-3">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {auditLogs.map((log) => (
+                  <tr key={log.id} className="border-t border-border align-top">
+                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                      {new Date(log.created_at).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </td>
+                    <td className="px-4 py-3 text-foreground">{log.actor_email ?? "System"}</td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center rounded-sm bg-brass/10 text-brass px-2 py-1 text-[11px] font-medium">
+                        {log.action.replace(/_/g, " ")}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground font-mono text-[11px]">
+                      {auditDetail(log.details)}
+                    </td>
+                  </tr>
+                ))}
+                {auditLogs.length === 0 && (
+                  <tr><td colSpan={4} className="px-4 py-12 text-center text-muted-foreground">No audit entries yet.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </main>
 
       {/* Message Modal */}
@@ -493,6 +540,13 @@ function AdminPage() {
       )}
     </div>
   );
+}
+
+function auditDetail(details: Record<string, unknown>): string {
+  if (!details || typeof details !== "object") return "—";
+  const entries = Object.entries(details).filter(([, v]) => v !== null && v !== undefined && v !== "");
+  if (entries.length === 0) return "—";
+  return entries.map(([k, v]) => `${k}: ${String(v)}`).join(" · ");
 }
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
