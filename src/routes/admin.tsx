@@ -63,15 +63,17 @@ function AdminPage() {
 
     if (!admin) { setLoading(false); return; }
 
-    const [{ data: m }, { data: p }, { data: a }, { data: c }] = await Promise.all([
+    const [{ data: m }, { data: p }, { data: a }, { data: c }, logs] = await Promise.all([
       supabase.from("members").select("*").order("created_at", { ascending: false }),
       supabase.from("payments").select("amount_zmw,status"),
       supabase.rpc("list_admins"),
       supabase.from("certificates").select("id,member_id,user_id,certificate_number,revoked,revoke_reason,expires_at").order("issued_at", { ascending: false }),
+      fetchAuditLogs(100).catch(() => []),
     ]);
     setMembers((m ?? []) as Member[]);
     setAdmins((a ?? []) as AdminEntry[]);
     setCerts((c ?? []) as CertRow[]);
+    setAuditLogs(logs as AuditLogEntry[]);
     const paid = (p ?? []).filter((x) => x.status === "success");
     setSummary({
       total_paid: paid.reduce((s, x) => s + (x.amount_zmw ?? 0), 0),
