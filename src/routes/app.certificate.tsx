@@ -1,6 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Download, ShieldCheck, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Download, ShieldCheck, Loader2, Printer } from "lucide-react";
+import { toPng } from "html-to-image";
+import { jsPDF } from "jspdf";
+import QRCode from "qrcode";
 import { useAuth } from "@/hooks/use-auth";
 import namaLogo from "@/assets/nama-logo.jpg";
 import {
