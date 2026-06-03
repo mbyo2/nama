@@ -2,10 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import {
   ArrowLeft, Plus, Edit, Trash2, Eye, EyeOff, FileText, Calendar, Clock,
-  Loader2, Save, X
+  Loader2, Save, X, Send, Archive
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import { 
   createBlogPost, 
   updateBlogPost, 
@@ -15,6 +16,18 @@ import {
   type CreateBlogPostInput
 } from "@/lib/nama-api";
 import { toast } from "sonner";
+
+// Legacy posts were stored as plain text; render those preserving line breaks,
+// while new posts contain HTML from the rich-text editor.
+function toContentHtml(content: string): string {
+  if (!content) return "";
+  const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(content);
+  if (looksLikeHtml) return content;
+  return content
+    .split(/\n{2,}/)
+    .map((block) => `<p>${block.replace(/\n/g, "<br />")}</p>`)
+    .join("");
+}
 
 export const Route = createFileRoute("/admin-blog")({
   component: AdminBlogPage,
@@ -115,24 +128,29 @@ function AdminBlogPage() {
     setIsCreating(false);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (statusOverride?: BlogPost["status"]) => {
     if (!user) return;
-    
+
     if (!formData.title.trim() || !formData.slug.trim() || !formData.content.trim()) {
       toast.error("Please fill in title, slug, and content");
       return;
     }
 
+    const payload: CreateBlogPostInput = statusOverride
+      ? { ...formData, status: statusOverride }
+      : formData;
+
     setSaving(true);
     try {
       if (isCreating) {
-        await createBlogPost(user.id, user.email || "Admin", formData);
-        toast.success("Blog post created successfully!");
+        await createBlogPost(user.id, user.email || "Admin", payload);
+        toast.success(payload.status === "published" ? "Article published!" : "Draft saved.");
       } else if (editingPost) {
-        await updateBlogPost(editingPost.id, formData);
-        toast.success("Blog post updated successfully!");
+        await updateBlogPost(editingPost.id, payload);
+        toast.success(payload.status === "published" ? "Article published!" : "Article updated.");
       }
-      
+
+      setFormData((prev) => ({ ...prev, status: payload.status }));
       setIsCreating(false);
       setEditingPost(null);
       loadPosts();
@@ -140,6 +158,17 @@ function AdminBlogPage() {
       toast.error(error.message || "Failed to save blog post");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleToggleStatus = async (post: BlogPost) => {
+    const next = post.status === "published" ? "draft" : "published";
+    try {
+      await updateBlogPost(post.id, { status: next });
+      toast.success(next === "published" ? "Article published!" : "Article unpublished.");
+      loadPosts();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update status");
     }
   };
 
@@ -269,12 +298,10 @@ function AdminBlogPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">Content</label>
-                  <textarea
+                  <RichTextEditor
                     value={formData.content}
-                    onChange={(e) => updateField('content', e.target.value)}
-                    placeholder="Write your article content here..."
-                    rows={12}
-                    className="w-full rounded-sm border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brass focus:border-transparent resize-none font-mono"
+                    onChange={(html) => updateField('content', html)}
+                    placeholder="Write your article — use the toolbar for headings, lists, quotes and links…"
                   />
                 </div>
 
@@ -319,31 +346,32 @@ function AdminBlogPage() {
                 <div className="pt-6 space-y-3">
                   <button
                     onClick={handlePreview}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-paper text-foreground px-6 py-3 text-sm font-medium hover:bg-card"
+                    disabled={saving}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-paper text-foreground px-6 py-3 text-sm font-medium hover:bg-card disabled:opacity-40"
                   >
                     <Eye className="w-4 h-4" />
                     Preview
                   </button>
                   <button
-                    onClick={handleSave}
+                    onClick={() => handleSave("published")}
                     disabled={saving}
                     className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-brass text-ink px-6 py-3 text-sm font-semibold hover:bg-brass/90 disabled:opacity-40"
                   >
-                    {saving ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        {isCreating ? "Create Article" : "Update Article"}
-                      </>
-                    )}
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    Publish
+                  </button>
+                  <button
+                    onClick={() => handleSave("draft")}
+                    disabled={saving}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-paper text-foreground px-6 py-3 text-sm font-medium hover:bg-card disabled:opacity-40"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save as draft
                   </button>
                   <button
                     onClick={handleCancel}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-paper text-foreground px-6 py-3 text-sm font-medium hover:bg-card"
+                    disabled={saving}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-transparent text-muted-foreground px-6 py-3 text-sm font-medium hover:text-foreground disabled:opacity-40"
                   >
                     Cancel
                   </button>
@@ -352,6 +380,7 @@ function AdminBlogPage() {
             </div>
           </div>
         )}
+
 
         <div className="border border-border bg-card overflow-x-auto">
           <table className="w-full text-[13px]">
@@ -394,6 +423,12 @@ function AdminBlogPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleToggleStatus(post)}
+                        className={`inline-flex items-center gap-1 text-[11px] hover:underline ${post.status === 'published' ? 'text-muted-foreground' : 'text-green-700'}`}
+                      >
+                        {post.status === 'published' ? <><EyeOff className="w-3 h-3" /> Unpublish</> : <><Send className="w-3 h-3" /> Publish</>}
+                      </button>
                       <button
                         onClick={() => handleEdit(post)}
                         className="inline-flex items-center gap-1 text-[11px] text-brass hover:underline"
@@ -442,11 +477,11 @@ function AdminBlogPage() {
               <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-2">By {user?.email || "Admin"}</p>
               <h1 className="font-serif text-4xl text-foreground leading-tight mb-4">{formData.title}</h1>
               <p className="text-lg text-muted-foreground mb-8">{formData.excerpt}</p>
-              <div className="prose prose-lg max-w-none">
-                <div className="whitespace-pre-wrap text-foreground/85 leading-relaxed">
-                  {formData.content}
-                </div>
-              </div>
+              <div
+                className="blog-content max-w-none"
+                dangerouslySetInnerHTML={{ __html: toContentHtml(formData.content) }}
+              />
+
             </div>
           </div>
         </div>

@@ -5,6 +5,18 @@ import { ArrowLeft, Calendar, Clock, Loader2, FileText } from "lucide-react";
 import namaLogo from "@/assets/nama-logo.jpg";
 import { fetchBlogPost, fetchBlogPosts, type BlogPost } from "@/lib/nama-api";
 
+// Legacy posts were stored as plain text; render those preserving line breaks,
+// while new posts contain HTML from the rich-text editor.
+function toContentHtml(content: string): string {
+  if (!content) return "";
+  const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(content);
+  if (looksLikeHtml) return content;
+  return content
+    .split(/\n{2,}/)
+    .map((block) => `<p>${block.replace(/\n/g, "<br />")}</p>`)
+    .join("");
+}
+
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
     const post = await fetchBlogPost(params.slug);
@@ -160,11 +172,10 @@ function BlogPostPage() {
       {/* Body */}
       <main className="py-16">
         <article className="max-w-2xl mx-auto px-6">
-          <div className="prose prose-lg max-w-none">
-            <div className="whitespace-pre-wrap text-[16px] text-foreground/85 leading-[1.75]">
-              {post.content}
-            </div>
-          </div>
+          <div
+            className="blog-content max-w-none text-[16px]"
+            dangerouslySetInnerHTML={{ __html: toContentHtml(post.content) }}
+          />
         </article>
       </main>
 
