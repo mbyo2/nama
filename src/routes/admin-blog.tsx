@@ -477,11 +477,11 @@ function AdminBlogPage() {
               <p className="text-[10px] uppercase tracking-[0.2em] text-brass mb-2">By {user?.email || "Admin"}</p>
               <h1 className="font-serif text-4xl text-foreground leading-tight mb-4">{formData.title}</h1>
               <p className="text-lg text-muted-foreground mb-8">{formData.excerpt}</p>
-              <div className="prose prose-lg max-w-none">
-                <div className="whitespace-pre-wrap text-foreground/85 leading-relaxed">
-                  {formData.content}
-                </div>
-              </div>
+              <div
+                className="blog-content max-w-none"
+                dangerouslySetInnerHTML={{ __html: toContentHtml(formData.content) }}
+              />
+
             </div>
           </div>
         </div>
