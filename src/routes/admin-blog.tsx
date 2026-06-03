@@ -298,12 +298,10 @@ function AdminBlogPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">Content</label>
-                  <textarea
+                  <RichTextEditor
                     value={formData.content}
-                    onChange={(e) => updateField('content', e.target.value)}
-                    placeholder="Write your article content here..."
-                    rows={12}
-                    className="w-full rounded-sm border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brass focus:border-transparent resize-none font-mono"
+                    onChange={(html) => updateField('content', html)}
+                    placeholder="Write your article — use the toolbar for headings, lists, quotes and links…"
                   />
                 </div>
 
