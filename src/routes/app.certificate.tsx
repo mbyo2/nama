@@ -213,6 +213,7 @@ function CertificatePage() {
       {/* Certificate */}
       <div className="max-w-4xl mx-auto px-6 py-10 print:p-0 print:max-w-none">
         <div
+          ref={certRef}
           className="relative bg-card border border-ink/15 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] print:shadow-none print:border-0"
           style={{ aspectRatio: "1.414 / 1" }}
         >
