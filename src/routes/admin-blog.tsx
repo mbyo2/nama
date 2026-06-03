@@ -2,10 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import {
   ArrowLeft, Plus, Edit, Trash2, Eye, EyeOff, FileText, Calendar, Clock,
-  Loader2, Save, X
+  Loader2, Save, X, Send, Archive
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import { 
   createBlogPost, 
   updateBlogPost, 
@@ -15,6 +16,18 @@ import {
   type CreateBlogPostInput
 } from "@/lib/nama-api";
 import { toast } from "sonner";
+
+// Legacy posts were stored as plain text; render those preserving line breaks,
+// while new posts contain HTML from the rich-text editor.
+function toContentHtml(content: string): string {
+  if (!content) return "";
+  const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(content);
+  if (looksLikeHtml) return content;
+  return content
+    .split(/\n{2,}/)
+    .map((block) => `<p>${block.replace(/\n/g, "<br />")}</p>`)
+    .join("");
+}
 
 export const Route = createFileRoute("/admin-blog")({
   component: AdminBlogPage,
