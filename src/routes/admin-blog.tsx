@@ -128,24 +128,29 @@ function AdminBlogPage() {
     setIsCreating(false);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (statusOverride?: BlogPost["status"]) => {
     if (!user) return;
-    
+
     if (!formData.title.trim() || !formData.slug.trim() || !formData.content.trim()) {
       toast.error("Please fill in title, slug, and content");
       return;
     }
 
+    const payload: CreateBlogPostInput = statusOverride
+      ? { ...formData, status: statusOverride }
+      : formData;
+
     setSaving(true);
     try {
       if (isCreating) {
-        await createBlogPost(user.id, user.email || "Admin", formData);
-        toast.success("Blog post created successfully!");
+        await createBlogPost(user.id, user.email || "Admin", payload);
+        toast.success(payload.status === "published" ? "Article published!" : "Draft saved.");
       } else if (editingPost) {
-        await updateBlogPost(editingPost.id, formData);
-        toast.success("Blog post updated successfully!");
+        await updateBlogPost(editingPost.id, payload);
+        toast.success(payload.status === "published" ? "Article published!" : "Article updated.");
       }
-      
+
+      setFormData((prev) => ({ ...prev, status: payload.status }));
       setIsCreating(false);
       setEditingPost(null);
       loadPosts();
@@ -153,6 +158,17 @@ function AdminBlogPage() {
       toast.error(error.message || "Failed to save blog post");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleToggleStatus = async (post: BlogPost) => {
+    const next = post.status === "published" ? "draft" : "published";
+    try {
+      await updateBlogPost(post.id, { status: next });
+      toast.success(next === "published" ? "Article published!" : "Article unpublished.");
+      loadPosts();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update status");
     }
   };
 
