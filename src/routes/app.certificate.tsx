@@ -114,10 +114,6 @@ function CertificatePage() {
     );
   }
 
-  const verifyUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/verify?token=${certificate.verification_token}`;
-  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=${encodeURIComponent(verifyUrl)}`;
-  const issued = new Date(certificate.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  const expires = new Date(certificate.expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
   const verifyUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/verify?token=${certificate.verification_token}`;
   const qrSrc = qrDataUrl || `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=${encodeURIComponent(verifyUrl)}`;
