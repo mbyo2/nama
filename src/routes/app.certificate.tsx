@@ -119,6 +119,58 @@ function CertificatePage() {
   const issued = new Date(certificate.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   const expires = new Date(certificate.expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
+  const verifyUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/verify?token=${certificate.verification_token}`;
+  const qrSrc = qrDataUrl || `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=${encodeURIComponent(verifyUrl)}`;
+  const issued = new Date(certificate.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  const expires = new Date(certificate.expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  const fileBase = `NAMA-Certificate-${certificate.certificate_number.replace(/[^a-zA-Z0-9]+/g, "-")}`;
+
+  const renderCertImage = async (): Promise<string> => {
+    const node = certRef.current;
+    if (!node) throw new Error("Certificate not ready");
+    return toPng(node, {
+      pixelRatio: 2,
+      cacheBust: true,
+      backgroundColor: "#ffffff",
+    });
+  };
+
+  const handleDownloadPdf = async () => {
+    setDownloading(true);
+    try {
+      const dataUrl = await renderCertImage();
+      const node = certRef.current!;
+      const w = node.offsetWidth;
+      const h = node.offsetHeight;
+      const orientation = w >= h ? "landscape" : "portrait";
+      const pdf = new jsPDF({ orientation, unit: "px", format: [w, h] });
+      pdf.addImage(dataUrl, "PNG", 0, 0, w, h);
+      pdf.save(`${fileBase}.pdf`);
+    } catch (error) {
+      console.error("PDF download failed:", error);
+      toast.error("Could not generate the PDF. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleDownloadImage = async () => {
+    setDownloading(true);
+    try {
+      const dataUrl = await renderCertImage();
+      const link = document.createElement("a");
+      link.download = `${fileBase}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error("Image download failed:", error);
+      toast.error("Could not generate the image. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const handlePrint = () => {
     try {
       window.print();
@@ -132,16 +184,33 @@ function CertificatePage() {
     <div className="min-h-screen bg-paper text-foreground">
       {/* Header — hidden on print */}
       <div className="print:hidden border-b border-border">
-        <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-6 py-5 flex flex-wrap items-center justify-between gap-3">
           <Link to="/app" className="inline-flex items-center gap-2 text-[12px] text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
           </Link>
-          <button
-            onClick={handlePrint}
-            className="inline-flex items-center gap-2 rounded-sm bg-foreground text-paper px-5 py-2.5 text-[13px] font-semibold hover:bg-foreground/90"
-          >
-            <Download className="w-3.5 h-3.5" /> Print / Save PDF
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrint}
+              disabled={downloading}
+              className="inline-flex items-center gap-2 rounded-sm border border-border bg-transparent text-foreground px-4 py-2.5 text-[13px] font-semibold hover:bg-foreground/5 disabled:opacity-50"
+            >
+              <Printer className="w-3.5 h-3.5" /> Print
+            </button>
+            <button
+              onClick={handleDownloadImage}
+              disabled={downloading}
+              className="inline-flex items-center gap-2 rounded-sm border border-border bg-transparent text-foreground px-4 py-2.5 text-[13px] font-semibold hover:bg-foreground/5 disabled:opacity-50"
+            >
+              <Download className="w-3.5 h-3.5" /> PNG
+            </button>
+            <button
+              onClick={handleDownloadPdf}
+              disabled={downloading}
+              className="inline-flex items-center gap-2 rounded-sm bg-foreground text-paper px-5 py-2.5 text-[13px] font-semibold hover:bg-foreground/90 disabled:opacity-50"
+            >
+              {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} Download PDF
+            </button>
+          </div>
         </div>
       </div>
 
