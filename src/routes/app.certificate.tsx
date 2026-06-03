@@ -1,6 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Download, ShieldCheck, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Download, ShieldCheck, Loader2, Printer } from "lucide-react";
+import { toPng } from "html-to-image";
+import { jsPDF } from "jspdf";
+import QRCode from "qrcode";
 import { useAuth } from "@/hooks/use-auth";
 import namaLogo from "@/assets/nama-logo.jpg";
 import {
@@ -26,6 +29,9 @@ function CertificatePage() {
   const [certificate, setCertificate] = useState<Certificate | null>(null);
   const [category, setCategory] = useState<MembershipCategory | null>(null);
   const [bootstrapped, setBootstrapped] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [downloading, setDownloading] = useState(false);
+  const certRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -70,6 +76,16 @@ function CertificatePage() {
     return () => { cancelled = true; };
   }, [user, authLoading, navigate]);
 
+  // Generate the verification QR locally so it embeds cleanly in downloads (no CORS taint).
+  useEffect(() => {
+    if (!certificate) return;
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const url = `${origin}/verify?token=${certificate.verification_token}`;
+    QRCode.toDataURL(url, { margin: 0, width: 240, errorCorrectionLevel: "M" })
+      .then(setQrDataUrl)
+      .catch((e) => console.error("QR generation failed:", e));
+  }, [certificate]);
+
   if (authLoading || !bootstrapped) {
     return (
       <div className="min-h-screen bg-paper flex items-center justify-center">
@@ -98,10 +114,58 @@ function CertificatePage() {
     );
   }
 
+
   const verifyUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/verify?token=${certificate.verification_token}`;
-  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=${encodeURIComponent(verifyUrl)}`;
+  const qrSrc = qrDataUrl || `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=${encodeURIComponent(verifyUrl)}`;
   const issued = new Date(certificate.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   const expires = new Date(certificate.expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  const fileBase = `NAMA-Certificate-${certificate.certificate_number.replace(/[^a-zA-Z0-9]+/g, "-")}`;
+
+  const renderCertImage = async (): Promise<string> => {
+    const node = certRef.current;
+    if (!node) throw new Error("Certificate not ready");
+    return toPng(node, {
+      pixelRatio: 2,
+      cacheBust: true,
+      backgroundColor: "#ffffff",
+    });
+  };
+
+  const handleDownloadPdf = async () => {
+    setDownloading(true);
+    try {
+      const dataUrl = await renderCertImage();
+      const node = certRef.current!;
+      const w = node.offsetWidth;
+      const h = node.offsetHeight;
+      const orientation = w >= h ? "landscape" : "portrait";
+      const pdf = new jsPDF({ orientation, unit: "px", format: [w, h] });
+      pdf.addImage(dataUrl, "PNG", 0, 0, w, h);
+      pdf.save(`${fileBase}.pdf`);
+    } catch (error) {
+      console.error("PDF download failed:", error);
+      toast.error("Could not generate the PDF. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleDownloadImage = async () => {
+    setDownloading(true);
+    try {
+      const dataUrl = await renderCertImage();
+      const link = document.createElement("a");
+      link.download = `${fileBase}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error("Image download failed:", error);
+      toast.error("Could not generate the image. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const handlePrint = () => {
     try {
@@ -116,22 +180,40 @@ function CertificatePage() {
     <div className="min-h-screen bg-paper text-foreground">
       {/* Header — hidden on print */}
       <div className="print:hidden border-b border-border">
-        <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-6 py-5 flex flex-wrap items-center justify-between gap-3">
           <Link to="/app" className="inline-flex items-center gap-2 text-[12px] text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to dashboard
           </Link>
-          <button
-            onClick={handlePrint}
-            className="inline-flex items-center gap-2 rounded-sm bg-foreground text-paper px-5 py-2.5 text-[13px] font-semibold hover:bg-foreground/90"
-          >
-            <Download className="w-3.5 h-3.5" /> Print / Save PDF
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrint}
+              disabled={downloading}
+              className="inline-flex items-center gap-2 rounded-sm border border-border bg-transparent text-foreground px-4 py-2.5 text-[13px] font-semibold hover:bg-foreground/5 disabled:opacity-50"
+            >
+              <Printer className="w-3.5 h-3.5" /> Print
+            </button>
+            <button
+              onClick={handleDownloadImage}
+              disabled={downloading}
+              className="inline-flex items-center gap-2 rounded-sm border border-border bg-transparent text-foreground px-4 py-2.5 text-[13px] font-semibold hover:bg-foreground/5 disabled:opacity-50"
+            >
+              <Download className="w-3.5 h-3.5" /> PNG
+            </button>
+            <button
+              onClick={handleDownloadPdf}
+              disabled={downloading}
+              className="inline-flex items-center gap-2 rounded-sm bg-foreground text-paper px-5 py-2.5 text-[13px] font-semibold hover:bg-foreground/90 disabled:opacity-50"
+            >
+              {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} Download PDF
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Certificate */}
       <div className="max-w-4xl mx-auto px-6 py-10 print:p-0 print:max-w-none">
         <div
+          ref={certRef}
           className="relative bg-card border border-ink/15 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] print:shadow-none print:border-0"
           style={{ aspectRatio: "1.414 / 1" }}
         >
