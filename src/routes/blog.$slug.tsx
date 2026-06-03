@@ -160,11 +160,10 @@ function BlogPostPage() {
       {/* Body */}
       <main className="py-16">
         <article className="max-w-2xl mx-auto px-6">
-          <div className="prose prose-lg max-w-none">
-            <div className="whitespace-pre-wrap text-[16px] text-foreground/85 leading-[1.75]">
-              {post.content}
-            </div>
-          </div>
+          <div
+            className="blog-content max-w-none text-[16px]"
+            dangerouslySetInnerHTML={{ __html: toContentHtml(post.content) }}
+          />
         </article>
       </main>
 
