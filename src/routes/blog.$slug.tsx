@@ -5,6 +5,18 @@ import { ArrowLeft, Calendar, Clock, Loader2, FileText } from "lucide-react";
 import namaLogo from "@/assets/nama-logo.jpg";
 import { fetchBlogPost, fetchBlogPosts, type BlogPost } from "@/lib/nama-api";
 
+// Legacy posts were stored as plain text; render those preserving line breaks,
+// while new posts contain HTML from the rich-text editor.
+function toContentHtml(content: string): string {
+  if (!content) return "";
+  const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(content);
+  if (looksLikeHtml) return content;
+  return content
+    .split(/\n{2,}/)
+    .map((block) => `<p>${block.replace(/\n/g, "<br />")}</p>`)
+    .join("");
+}
+
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
     const post = await fetchBlogPost(params.slug);
