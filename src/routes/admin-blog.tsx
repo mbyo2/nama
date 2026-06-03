@@ -424,6 +424,12 @@ function AdminBlogPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <button
+                        onClick={() => handleToggleStatus(post)}
+                        className={`inline-flex items-center gap-1 text-[11px] hover:underline ${post.status === 'published' ? 'text-muted-foreground' : 'text-green-700'}`}
+                      >
+                        {post.status === 'published' ? <><EyeOff className="w-3 h-3" /> Unpublish</> : <><Send className="w-3 h-3" /> Publish</>}
+                      </button>
+                      <button
                         onClick={() => handleEdit(post)}
                         className="inline-flex items-center gap-1 text-[11px] text-brass hover:underline"
                       >
