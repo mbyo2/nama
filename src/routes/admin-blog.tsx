@@ -346,31 +346,32 @@ function AdminBlogPage() {
                 <div className="pt-6 space-y-3">
                   <button
                     onClick={handlePreview}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-paper text-foreground px-6 py-3 text-sm font-medium hover:bg-card"
+                    disabled={saving}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-paper text-foreground px-6 py-3 text-sm font-medium hover:bg-card disabled:opacity-40"
                   >
                     <Eye className="w-4 h-4" />
                     Preview
                   </button>
                   <button
-                    onClick={handleSave}
+                    onClick={() => handleSave("published")}
                     disabled={saving}
                     className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-brass text-ink px-6 py-3 text-sm font-semibold hover:bg-brass/90 disabled:opacity-40"
                   >
-                    {saving ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        {isCreating ? "Create Article" : "Update Article"}
-                      </>
-                    )}
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    Publish
+                  </button>
+                  <button
+                    onClick={() => handleSave("draft")}
+                    disabled={saving}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-paper text-foreground px-6 py-3 text-sm font-medium hover:bg-card disabled:opacity-40"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save as draft
                   </button>
                   <button
                     onClick={handleCancel}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-paper text-foreground px-6 py-3 text-sm font-medium hover:bg-card"
+                    disabled={saving}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-sm border border-transparent text-muted-foreground px-6 py-3 text-sm font-medium hover:text-foreground disabled:opacity-40"
                   >
                     Cancel
                   </button>
@@ -379,6 +380,7 @@ function AdminBlogPage() {
             </div>
           </div>
         )}
+
 
         <div className="border border-border bg-card overflow-x-auto">
           <table className="w-full text-[13px]">
