@@ -76,6 +76,16 @@ function CertificatePage() {
     return () => { cancelled = true; };
   }, [user, authLoading, navigate]);
 
+  // Generate the verification QR locally so it embeds cleanly in downloads (no CORS taint).
+  useEffect(() => {
+    if (!certificate) return;
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const url = `${origin}/verify?token=${certificate.verification_token}`;
+    QRCode.toDataURL(url, { margin: 0, width: 240, errorCorrectionLevel: "M" })
+      .then(setQrDataUrl)
+      .catch((e) => console.error("QR generation failed:", e));
+  }, [certificate]);
+
   if (authLoading || !bootstrapped) {
     return (
       <div className="min-h-screen bg-paper flex items-center justify-center">
