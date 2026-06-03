@@ -29,6 +29,9 @@ function CertificatePage() {
   const [certificate, setCertificate] = useState<Certificate | null>(null);
   const [category, setCategory] = useState<MembershipCategory | null>(null);
   const [bootstrapped, setBootstrapped] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [downloading, setDownloading] = useState(false);
+  const certRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (authLoading) return;
