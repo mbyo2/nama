@@ -101,6 +101,16 @@ function Toolbar({ editor }: { editor: Editor }) {
       <ToolbarButton title="Link" active={editor.isActive("link")} onClick={setLink}>
         <LinkIcon className="w-4 h-4" />
       </ToolbarButton>
+      <ToolbarButton title="Insert image" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
+        {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
+      </ToolbarButton>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageFile}
+      />
       <span className="mx-1 h-5 w-px bg-border" />
       <ToolbarButton title="Bullet list" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}>
         <List className="w-4 h-4" />
