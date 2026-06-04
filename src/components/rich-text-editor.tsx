@@ -155,7 +155,9 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       Link.configure({ openOnClick: false, autolink: true }),
+      ResizableImage.configure({ inline: false, allowBase64: false }),
     ],
+    immediatelyRender: false,
     content: normalizeInitialContent(value),
     editorProps: {
       attributes: {
