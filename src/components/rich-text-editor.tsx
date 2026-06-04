@@ -1,11 +1,16 @@
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bold, Italic, Heading2, Heading3, List, ListOrdered,
   Quote, Code, Undo, Redo, Link as LinkIcon, Minus, Pilcrow,
+  ImagePlus, Loader2,
 } from "lucide-react";
+import { ResizableImage } from "@/components/resizable-image";
+import { uploadBlogImage } from "@/lib/nama-api";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 interface RichTextEditorProps {
   value: string;
