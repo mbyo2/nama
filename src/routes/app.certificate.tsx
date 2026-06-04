@@ -78,9 +78,12 @@ function CertificatePage() {
     if (!certificate) return;
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const url = `${origin}/verify?token=${certificate.verification_token}`;
-    QRCode.toDataURL(url, { margin: 0, width: 240, errorCorrectionLevel: "M" })
+    import("qrcode")
+      .then(({ default: QRCode }) =>
+        QRCode.toDataURL(url, { margin: 0, width: 240, errorCorrectionLevel: "M" }),
+      )
       .then(setQrDataUrl)
-      .catch((e) => console.error("QR generation failed:", e));
+      .catch((e: unknown) => console.error("QR generation failed:", e));
   }, [certificate]);
 
   if (authLoading || !bootstrapped) {
@@ -122,6 +125,7 @@ function CertificatePage() {
   const renderCertImage = async (): Promise<string> => {
     const node = certRef.current;
     if (!node) throw new Error("Certificate not ready");
+    const { toPng } = await import("html-to-image");
     return toPng(node, {
       pixelRatio: 2,
       cacheBust: true,
@@ -137,6 +141,7 @@ function CertificatePage() {
       const w = node.offsetWidth;
       const h = node.offsetHeight;
       const orientation = w >= h ? "landscape" : "portrait";
+      const { jsPDF } = await import("jspdf");
       const pdf = new jsPDF({ orientation, unit: "px", format: [w, h] });
       pdf.addImage(dataUrl, "PNG", 0, 0, w, h);
       pdf.save(`${fileBase}.pdf`);
