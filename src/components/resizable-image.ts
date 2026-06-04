@@ -62,11 +62,12 @@ export const ResizableImage = Image.extend({
         document.removeEventListener("pointermove", onPointerMove);
         document.removeEventListener("pointerup", onPointerUp);
         const finalWidth = `${Math.round(img.getBoundingClientRect().width)}px`;
-        if (typeof getPos === "function") {
+        const pos = typeof getPos === "function" ? getPos() : undefined;
+        if (typeof pos === "number") {
           editor
             .chain()
             .command(({ tr }) => {
-              tr.setNodeMarkup(getPos(), undefined, {
+              tr.setNodeMarkup(pos, undefined, {
                 ...node.attrs,
                 width: finalWidth,
               });
