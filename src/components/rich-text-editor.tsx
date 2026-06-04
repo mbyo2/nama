@@ -46,6 +46,10 @@ function ToolbarButton({
 }
 
 function Toolbar({ editor }: { editor: Editor }) {
+  const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
   const setLink = () => {
     const previous = editor.getAttributes("link").href as string | undefined;
     const url = window.prompt("Link URL", previous ?? "https://");
@@ -55,6 +59,25 @@ function Toolbar({ editor }: { editor: Editor }) {
       return;
     }
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+  };
+
+  const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!user) {
+      toast.error("You must be signed in to upload images.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const url = await uploadBlogImage(user.id, file);
+      editor.chain().focus().setImage({ src: url, alt: file.name }).run();
+    } catch (err: any) {
+      toast.error(err?.message || "Could not upload the image.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
