@@ -1,11 +1,16 @@
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bold, Italic, Heading2, Heading3, List, ListOrdered,
   Quote, Code, Undo, Redo, Link as LinkIcon, Minus, Pilcrow,
+  ImagePlus, Loader2,
 } from "lucide-react";
+import { ResizableImage } from "@/components/resizable-image";
+import { uploadBlogImage } from "@/lib/nama-api";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 interface RichTextEditorProps {
   value: string;
@@ -41,6 +46,10 @@ function ToolbarButton({
 }
 
 function Toolbar({ editor }: { editor: Editor }) {
+  const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
   const setLink = () => {
     const previous = editor.getAttributes("link").href as string | undefined;
     const url = window.prompt("Link URL", previous ?? "https://");
@@ -50,6 +59,25 @@ function Toolbar({ editor }: { editor: Editor }) {
       return;
     }
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+  };
+
+  const handleImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!user) {
+      toast.error("You must be signed in to upload images.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const url = await uploadBlogImage(user.id, file);
+      editor.chain().focus().setImage({ src: url, alt: file.name }).run();
+    } catch (err: any) {
+      toast.error(err?.message || "Could not upload the image.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -73,6 +101,16 @@ function Toolbar({ editor }: { editor: Editor }) {
       <ToolbarButton title="Link" active={editor.isActive("link")} onClick={setLink}>
         <LinkIcon className="w-4 h-4" />
       </ToolbarButton>
+      <ToolbarButton title="Insert image" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
+        {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
+      </ToolbarButton>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageFile}
+      />
       <span className="mx-1 h-5 w-px bg-border" />
       <ToolbarButton title="Bullet list" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}>
         <List className="w-4 h-4" />
@@ -117,7 +155,9 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       Link.configure({ openOnClick: false, autolink: true }),
+      ResizableImage.configure({ inline: false, allowBase64: false }),
     ],
+    immediatelyRender: false,
     content: normalizeInitialContent(value),
     editorProps: {
       attributes: {
