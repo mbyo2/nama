@@ -548,3 +548,36 @@ export async function fetchAuditLogs(limit = 100): Promise<AuditLogEntry[]> {
   if (error) throw error;
   return (data ?? []) as unknown as AuditLogEntry[];
 }
+
+// ── Blog image uploads ────────────────────────────────────────────
+// Uploads an image to the private "blog-images" bucket and returns a
+// long-lived signed URL (10 years) so it renders in published articles.
+const BLOG_IMAGE_SIGNED_TTL = 60 * 60 * 24 * 365 * 10; // 10 years
+
+export async function uploadBlogImage(userId: string, file: File): Promise<string> {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Please choose an image file.");
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("Image must be smaller than 5MB.");
+  }
+  const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("blog-images")
+    .upload(path, file, { cacheControl: "31536000", upsert: false });
+  if (uploadError) {
+    console.error("Blog image upload error:", uploadError);
+    throw uploadError;
+  }
+
+  const { data, error: signError } = await supabase.storage
+    .from("blog-images")
+    .createSignedUrl(path, BLOG_IMAGE_SIGNED_TTL);
+  if (signError || !data?.signedUrl) {
+    console.error("Blog image sign error:", signError);
+    throw signError ?? new Error("Could not generate image URL.");
+  }
+  return data.signedUrl;
+}
