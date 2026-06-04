@@ -367,6 +367,28 @@
   border-top: 1px solid var(--border);
   margin: 2em 0;
 }
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 2px;
+  margin: 1.2em 0;
+}
+.blog-content .rte-image-wrapper {
+  margin: 1.2em 0;
+}
+.rte-image-handle {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--brass, #c9a84c);
+  border: 2px solid var(--background, #fff);
+  cursor: nwse-resize;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
 .blog-content[data-placeholder] .is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   color: var(--muted-foreground);
