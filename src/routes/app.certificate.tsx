@@ -127,7 +127,11 @@ function CertificatePage() {
   const renderCertImage = async (): Promise<string> => {
     const node = certRef.current;
     if (!node) throw new Error("Certificate not ready");
+    if (!qrDataUrl) throw new Error("Verification QR is still generating");
     const { toPng } = await import("html-to-image");
+    // Render twice — the first pass warms the cloned styles/fonts so the
+    // second pass captures a fully painted certificate reliably.
+    await toPng(node, { pixelRatio: 2, cacheBust: true, backgroundColor: "#ffffff" });
     return toPng(node, {
       pixelRatio: 2,
       cacheBust: true,
