@@ -274,15 +274,22 @@ function CertificatePage() {
               </div>
 
               <div className="flex flex-col items-center">
-                <img
-                  src={qrSrc}
-                  alt="Verification QR code"
-                  width={120}
-                  height={120}
-                  className="bg-white p-1.5 rounded-sm"
-                />
+                {qrSrc ? (
+                  <img
+                    src={qrSrc}
+                    alt="Verification QR code"
+                    width={120}
+                    height={120}
+                    className="bg-white p-1.5 rounded-sm"
+                  />
+                ) : (
+                  <div className="w-[120px] h-[120px] bg-white p-1.5 rounded-sm flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+                  </div>
+                )}
                 <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Scan to verify</p>
               </div>
+
 
               <div className="text-right space-y-1">
                 <div className="font-serif italic text-2xl text-foreground border-b border-foreground/40 pb-1 px-2">
