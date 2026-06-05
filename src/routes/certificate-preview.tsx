@@ -30,7 +30,7 @@ const FALLBACK_TIERS: Pick<MembershipCategory, "id" | "name">[] = [
 function CertificatePreviewStudio() {
   const [categories, setCategories] = useState<Pick<MembershipCategory, "id" | "name">[]>(FALLBACK_TIERS);
   const [tierId, setTierId] = useState<string>(FALLBACK_TIERS[0].id);
-  const [fullName, setFullName] = useState("Chанda Mwale".normalize());
+  const [fullName, setFullName] = useState("Chanda Mwale");
   const [certificateNumber, setCertificateNumber] = useState("NAMA/2026/000123");
   const [discipline, setDiscipline] = useState("Film & Television");
   const [qrDataUrl, setQrDataUrl] = useState("");
