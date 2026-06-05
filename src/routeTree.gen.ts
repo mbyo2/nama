@@ -18,6 +18,7 @@ import { Route as PayRouteImport } from './routes/pay'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HelpRouteImport } from './routes/help'
+import { Route as CertificatePreviewRouteImport } from './routes/certificate-preview'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminBlogRouteImport } from './routes/admin-blog'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -73,6 +74,11 @@ const HelpRoute = HelpRouteImport.update({
   path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CertificatePreviewRoute = CertificatePreviewRouteImport.update({
+  id: '/certificate-preview',
+  path: '/certificate-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/admin-blog': typeof AdminBlogRoute
   '/app': typeof AppRouteWithChildren
+  '/certificate-preview': typeof CertificatePreviewRoute
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-blog': typeof AdminBlogRoute
+  '/certificate-preview': typeof CertificatePreviewRoute
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/admin-blog': typeof AdminBlogRoute
   '/app': typeof AppRouteWithChildren
+  '/certificate-preview': typeof CertificatePreviewRoute
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-blog'
     | '/app'
+    | '/certificate-preview'
     | '/help'
     | '/login'
     | '/messages'
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin-blog'
+    | '/certificate-preview'
     | '/help'
     | '/login'
     | '/messages'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin-blog'
     | '/app'
+    | '/certificate-preview'
     | '/help'
     | '/login'
     | '/messages'
@@ -246,6 +258,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AdminBlogRoute: typeof AdminBlogRoute
   AppRoute: typeof AppRouteWithChildren
+  CertificatePreviewRoute: typeof CertificatePreviewRoute
   HelpRoute: typeof HelpRoute
   LoginRoute: typeof LoginRoute
   MessagesRoute: typeof MessagesRoute
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       path: '/help'
       fullPath: '/help'
       preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/certificate-preview': {
+      id: '/certificate-preview'
+      path: '/certificate-preview'
+      fullPath: '/certificate-preview'
+      preLoaderRoute: typeof CertificatePreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -408,6 +428,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AdminBlogRoute: AdminBlogRoute,
   AppRoute: AppRouteWithChildren,
+  CertificatePreviewRoute: CertificatePreviewRoute,
   HelpRoute: HelpRoute,
   LoginRoute: LoginRoute,
   MessagesRoute: MessagesRoute,
