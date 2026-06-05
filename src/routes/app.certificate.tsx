@@ -1,12 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Download, ShieldCheck, Loader2, Printer } from "lucide-react";
+import { ArrowLeft, Download, ShieldCheck, Loader2, Printer, Eye } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import namaLogo from "@/assets/nama-logo.jpg";
 import {
   fetchMyMember, fetchMyCertificate, fetchCategories,
 } from "@/lib/nama-api";
 import type { Member, MembershipCategory, Certificate } from "@/lib/nama";
+import { CertificateTemplate } from "@/components/certificate-template";
+import {
+  downloadCertificatePng, downloadCertificatePdf, certificateFileBase,
+  waitForReady, QrTimeoutError,
+} from "@/lib/certificate-export";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/certificate")({
@@ -24,11 +28,14 @@ function CertificatePage() {
   const navigate = useNavigate();
   const [member, setMember] = useState<Member | null>(null);
   const [certificate, setCertificate] = useState<Certificate | null>(null);
-  const [category, setCategory] = useState<MembershipCategory | null>(null);
+  const [categories, setCategories] = useState<MembershipCategory[]>([]);
+  const [previewCategoryId, setPreviewCategoryId] = useState<string | null>(null);
   const [bootstrapped, setBootstrapped] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [downloading, setDownloading] = useState(false);
   const certRef = useRef<HTMLDivElement>(null);
+  // Mirror QR state in a ref so async export handlers can read the latest value.
+  const qrRef = useRef<string>("");
 
   useEffect(() => {
     if (authLoading) return;
@@ -36,32 +43,26 @@ function CertificatePage() {
     let cancelled = false;
     (async () => {
       try {
-        console.log("Certificate page: Loading data for user:", user.id);
         const [m, cert, cats] = await Promise.all([
           fetchMyMember(user.id),
           fetchMyCertificate(user.id),
           fetchCategories(),
         ]);
         if (cancelled) return;
-        console.log("Certificate page: Member data:", m);
-        console.log("Certificate page: Certificate data:", cert);
-        console.log("Certificate page: Categories:", cats);
         if (!m) {
-          console.log("Certificate page: No member found");
           toast.error("Please complete your registration first");
           navigate({ to: "/register" });
           return;
         }
         if (!cert) {
-          console.log("Certificate page: No certificate found");
           toast.error("No certificate found. Please complete your payment to receive your certificate.");
           navigate({ to: "/pay" });
           return;
         }
         setMember(m);
         setCertificate(cert);
-        setCategory(cats.find((c) => c.id === m.membership_category_id) ?? null);
-        console.log("Certificate page: All data loaded successfully");
+        setCategories(cats);
+        setPreviewCategoryId(m.membership_category_id);
       } catch (e) {
         console.error("Certificate page: Error loading data:", e);
         toast.error("Could not load your certificate. Please try again.");
@@ -76,14 +77,23 @@ function CertificatePage() {
   // Generate the verification QR locally so it embeds cleanly in downloads (no CORS taint).
   useEffect(() => {
     if (!certificate) return;
+    let cancelled = false;
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const url = `${origin}/verify?token=${certificate.verification_token}`;
     import("qrcode")
       .then(({ default: QRCode }) =>
         QRCode.toDataURL(url, { margin: 0, width: 240, errorCorrectionLevel: "M" }),
       )
-      .then(setQrDataUrl)
-      .catch((e: unknown) => console.error("QR generation failed:", e));
+      .then((dataUrl) => {
+        if (cancelled) return;
+        qrRef.current = dataUrl;
+        setQrDataUrl(dataUrl);
+      })
+      .catch((e: unknown) => {
+        console.error("Certificate QR generation failed:", e);
+        if (!cancelled) toast.error("Could not generate the verification QR code. Please refresh the page.");
+      });
+    return () => { cancelled = true; };
   }, [certificate]);
 
   if (authLoading || !bootstrapped) {
@@ -114,61 +124,49 @@ function CertificatePage() {
     );
   }
 
+  const realCategory = categories.find((c) => c.id === member.membership_category_id) ?? null;
+  const previewCategory = categories.find((c) => c.id === previewCategoryId) ?? realCategory;
+  const tierName = previewCategory?.name ?? "Member";
+  const isPreviewingOtherTier = previewCategoryId !== member.membership_category_id;
 
-  // Only use the locally-generated data URL — an external QR image would taint the
-  // canvas and make PNG/PDF export fail with a security error.
-  const qrSrc = qrDataUrl;
   const issued = new Date(certificate.issued_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   const expires = new Date(certificate.expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  const fileBase = certificateFileBase(certificate.certificate_number);
 
-  const fileBase = `NAMA-Certificate-${certificate.certificate_number.replace(/[^a-zA-Z0-9]+/g, "-")}`;
-
-  const renderCertImage = async (): Promise<string> => {
-    const node = certRef.current;
-    if (!node) throw new Error("Certificate not ready");
-    if (!qrDataUrl) throw new Error("Verification QR is still generating");
-    const { toPng } = await import("html-to-image");
-    // Render twice — the first pass warms the cloned styles/fonts so the
-    // second pass captures a fully painted certificate reliably.
-    await toPng(node, { pixelRatio: 2, cacheBust: true, backgroundColor: "#ffffff" });
-    return toPng(node, {
-      pixelRatio: 2,
-      cacheBust: true,
-      backgroundColor: "#ffffff",
-    });
-  };
-
-  const handleDownloadPdf = async () => {
-    setDownloading(true);
-    try {
-      const dataUrl = await renderCertImage();
-      const node = certRef.current!;
-      const w = node.offsetWidth;
-      const h = node.offsetHeight;
-      const orientation = w >= h ? "landscape" : "portrait";
-      const { jsPDF } = await import("jspdf");
-      const pdf = new jsPDF({ orientation, unit: "px", format: [w, h] });
-      pdf.addImage(dataUrl, "PNG", 0, 0, w, h);
-      pdf.save(`${fileBase}.pdf`);
-    } catch (error) {
-      console.error("PDF download failed:", error);
-      toast.error("Could not generate the PDF. Please try again.");
-    } finally {
-      setDownloading(false);
+  const reportExportError = (kind: "PNG" | "PDF", error: unknown) => {
+    console.error(`Certificate ${kind} export failed`, error);
+    if (error instanceof QrTimeoutError) {
+      toast.error("The verification QR code didn't finish generating. Please refresh the page and try again.");
+    } else {
+      toast.error(`Could not generate the ${kind}. Please try again.`);
     }
   };
 
   const handleDownloadImage = async () => {
     setDownloading(true);
     try {
-      const dataUrl = await renderCertImage();
-      const link = document.createElement("a");
-      link.download = `${fileBase}.png`;
-      link.href = dataUrl;
-      link.click();
+      await waitForReady(() => !!qrRef.current);
+      const node = certRef.current;
+      if (!node) throw new Error("Certificate element is not mounted");
+      await downloadCertificatePng(node, fileBase);
+      toast.success("Certificate PNG downloaded");
     } catch (error) {
-      console.error("Image download failed:", error);
-      toast.error("Could not generate the image. Please try again.");
+      reportExportError("PNG", error);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    setDownloading(true);
+    try {
+      await waitForReady(() => !!qrRef.current);
+      const node = certRef.current;
+      if (!node) throw new Error("Certificate element is not mounted");
+      await downloadCertificatePdf(node, fileBase);
+      toast.success("Certificate PDF downloaded");
+    } catch (error) {
+      reportExportError("PDF", error);
     } finally {
       setDownloading(false);
     }
@@ -178,8 +176,8 @@ function CertificatePage() {
     try {
       window.print();
     } catch (error) {
-      console.error("Print failed:", error);
-      toast.error("Could not open print dialog. Please try again.");
+      console.error("Certificate print failed:", error);
+      toast.error("Could not open the print dialog. Please try again.");
     }
   };
 
@@ -200,6 +198,7 @@ function CertificatePage() {
               <Printer className="w-3.5 h-3.5" /> Print
             </button>
             <button
+              data-testid="download-png"
               onClick={handleDownloadImage}
               disabled={downloading || !qrDataUrl}
               className="inline-flex items-center gap-2 rounded-sm border border-border bg-transparent text-foreground px-4 py-2.5 text-[13px] font-semibold hover:bg-foreground/5 disabled:opacity-50"
@@ -207,6 +206,7 @@ function CertificatePage() {
               <Download className="w-3.5 h-3.5" /> PNG
             </button>
             <button
+              data-testid="download-pdf"
               onClick={handleDownloadPdf}
               disabled={downloading || !qrDataUrl}
               className="inline-flex items-center gap-2 rounded-sm bg-foreground text-paper px-5 py-2.5 text-[13px] font-semibold hover:bg-foreground/90 disabled:opacity-50"
@@ -217,92 +217,43 @@ function CertificatePage() {
         </div>
       </div>
 
+      {/* Tier preview selector */}
+      <div className="print:hidden border-b border-border bg-card/40">
+        <div className="max-w-4xl mx-auto px-6 py-3 flex flex-wrap items-center gap-3">
+          <label htmlFor="tier-preview" className="inline-flex items-center gap-2 text-[12px] text-muted-foreground">
+            <Eye className="w-3.5 h-3.5 text-brass" /> Preview tier
+          </label>
+          <select
+            id="tier-preview"
+            data-testid="tier-preview"
+            value={previewCategoryId ?? ""}
+            onChange={(e) => setPreviewCategoryId(e.target.value)}
+            className="rounded-sm border border-input bg-background px-3 py-1.5 text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-brass"
+          >
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          {isPreviewingOtherTier && (
+            <span className="text-[12px] text-brass">
+              Preview only — your actual tier is {realCategory?.name ?? "—"}.
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Certificate */}
       <div className="max-w-4xl mx-auto px-6 py-10 print:p-0 print:max-w-none">
-        <div
+        <CertificateTemplate
           ref={certRef}
-          className="relative bg-card border border-ink/15 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] print:shadow-none print:border-0"
-          style={{ aspectRatio: "1.414 / 1" }}
-        >
-          {/* Inner border */}
-          <div className="absolute inset-4 border border-brass/40 pointer-events-none" />
-          <div className="absolute inset-6 border border-brass/20 pointer-events-none" />
-
-          <div className="relative h-full flex flex-col p-10 sm:p-14">
-            {/* Top */}
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <img src={namaLogo} alt="NAMA logo" className="w-12 h-12 rounded-full object-cover" />
-                <div>
-                  <p className="font-serif text-foreground text-lg font-semibold">NAMA</p>
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-                    National Association for Media Arts · Zambia
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] uppercase tracking-[0.25em] text-brass">Certificate №</p>
-                <p className="font-mono text-[13px] text-foreground mt-1">{certificate.certificate_number}</p>
-              </div>
-            </div>
-
-            {/* Body */}
-            <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
-              <p className="text-[11px] uppercase tracking-[0.3em] text-brass">— Certificate of Membership</p>
-              <p className="mt-6 text-[13px] text-muted-foreground">This certifies that</p>
-              <p className="mt-3 font-serif text-4xl sm:text-5xl text-foreground tracking-tight" style={{ lineHeight: "1.1" }}>
-                {member.full_name}
-              </p>
-              <div className="mt-3 w-24 h-px bg-brass" />
-              <p className="mt-5 text-[14px] text-muted-foreground max-w-md">
-                is a registered <strong className="text-foreground">{category?.name ?? "Member"}</strong> member of the National Association for Media Arts of Zambia, recognised in the discipline of <strong className="text-foreground">{member.artistic_discipline}</strong>.
-              </p>
-            </div>
-
-            {/* Bottom */}
-            <div className="flex items-end justify-between gap-8">
-              <div className="space-y-2 text-[11px] text-muted-foreground">
-                <div>
-                  <p className="uppercase tracking-[0.2em] text-brass">Issued</p>
-                  <p className="text-foreground text-[13px] mt-0.5">{issued}</p>
-                </div>
-                <div>
-                  <p className="uppercase tracking-[0.2em] text-brass">Valid until</p>
-                  <p className="text-foreground text-[13px] mt-0.5">{expires}</p>
-                </div>
-                <div className="pt-2 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3 h-3 text-brass" />
-                  <span>ECT Act 2021 · Advanced electronic signature</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-center">
-                {qrSrc ? (
-                  <img
-                    src={qrSrc}
-                    alt="Verification QR code"
-                    width={120}
-                    height={120}
-                    className="bg-white p-1.5 rounded-sm"
-                  />
-                ) : (
-                  <div className="w-[120px] h-[120px] bg-white p-1.5 rounded-sm flex items-center justify-center">
-                    <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
-                  </div>
-                )}
-                <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Scan to verify</p>
-              </div>
-
-
-              <div className="text-right space-y-1">
-                <div className="font-serif italic text-2xl text-foreground border-b border-foreground/40 pb-1 px-2">
-                  Morgan Mbulo
-                </div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">President · NAMA</p>
-              </div>
-            </div>
-          </div>
-        </div>
+          fullName={member.full_name}
+          certificateNumber={certificate.certificate_number}
+          tier={tierName}
+          discipline={member.artistic_discipline}
+          issued={issued}
+          expires={expires}
+          qrSrc={qrDataUrl}
+        />
 
         <p className="print:hidden mt-6 text-center text-[12px] text-muted-foreground">
           Verify at <Link to="/verify" search={{ token: certificate.verification_token }} className="text-foreground underline">{`${typeof window !== "undefined" ? window.location.host : ""}/verify`}</Link>
