@@ -23,6 +23,7 @@ import { Route as AdminBlogRouteImport } from './routes/admin-blog'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AppCertificateRouteImport } from './routes/app.certificate'
@@ -97,6 +98,11 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
   path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
 const SitemapXmlRoute = SitemapXmlRouteImport.update({
   id: '/sitemap/xml',
   path: '/sitemap/xml',
@@ -130,13 +136,13 @@ export interface FileRoutesByFullPath {
   '/app/certificate': typeof AppCertificateRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/sitemap/xml': typeof SitemapXmlRoute
+  '/app/': typeof AppIndexRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-blog': typeof AdminBlogRoute
-  '/app': typeof AppRouteWithChildren
   '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/messages': typeof MessagesRoute
@@ -149,6 +155,7 @@ export interface FileRoutesByTo {
   '/app/certificate': typeof AppCertificateRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/sitemap/xml': typeof SitemapXmlRoute
+  '/app': typeof AppIndexRoute
   '/blog': typeof BlogIndexRoute
 }
 export interface FileRoutesById {
@@ -169,6 +176,7 @@ export interface FileRoutesById {
   '/app/certificate': typeof AppCertificateRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/sitemap/xml': typeof SitemapXmlRoute
+  '/app/': typeof AppIndexRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRouteTypes {
@@ -190,13 +198,13 @@ export interface FileRouteTypes {
     | '/app/certificate'
     | '/blog/$slug'
     | '/sitemap/xml'
+    | '/app/'
     | '/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/admin-blog'
-    | '/app'
     | '/help'
     | '/login'
     | '/messages'
@@ -209,6 +217,7 @@ export interface FileRouteTypes {
     | '/app/certificate'
     | '/blog/$slug'
     | '/sitemap/xml'
+    | '/app'
     | '/blog'
   id:
     | '__root__'
@@ -228,6 +237,7 @@ export interface FileRouteTypes {
     | '/app/certificate'
     | '/blog/$slug'
     | '/sitemap/xml'
+    | '/app/'
     | '/blog/'
   fileRoutesById: FileRoutesById
 }
@@ -350,6 +360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/sitemap/xml': {
       id: '/sitemap/xml'
       path: '/sitemap/xml'
@@ -376,10 +393,12 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppCertificateRoute: typeof AppCertificateRoute
+  AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppCertificateRoute: AppCertificateRoute,
+  AppIndexRoute: AppIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

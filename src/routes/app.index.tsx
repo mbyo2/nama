@@ -15,7 +15,7 @@ import { formatZmw, membershipStatusLabel } from "@/lib/nama";
 import type { Member, MembershipCategory, Certificate } from "@/lib/nama";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/app")({
+export const Route = createFileRoute("/app/")({
   component: DashboardPage,
   head: () => ({
     meta: [
