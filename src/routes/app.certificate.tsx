@@ -202,14 +202,14 @@ function CertificatePage() {
             </button>
             <button
               onClick={handleDownloadImage}
-              disabled={downloading}
+              disabled={downloading || !qrDataUrl}
               className="inline-flex items-center gap-2 rounded-sm border border-border bg-transparent text-foreground px-4 py-2.5 text-[13px] font-semibold hover:bg-foreground/5 disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" /> PNG
             </button>
             <button
               onClick={handleDownloadPdf}
-              disabled={downloading}
+              disabled={downloading || !qrDataUrl}
               className="inline-flex items-center gap-2 rounded-sm bg-foreground text-paper px-5 py-2.5 text-[13px] font-semibold hover:bg-foreground/90 disabled:opacity-50"
             >
               {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} Download PDF
