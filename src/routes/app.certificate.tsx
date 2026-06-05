@@ -115,7 +115,6 @@ function CertificatePage() {
   }
 
 
-  const verifyUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/verify?token=${certificate.verification_token}`;
   // Only use the locally-generated data URL — an external QR image would taint the
   // canvas and make PNG/PDF export fail with a security error.
   const qrSrc = qrDataUrl;
