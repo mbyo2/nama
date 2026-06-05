@@ -23,8 +23,11 @@ const ROUTES = [
   "/certificate-preview",
 ];
 
+/** Minimal shape so we don't depend on @playwright/test type resolution here. */
+type ErrorEmitter = { on(event: "pageerror", listener: (err: Error) => void): void };
+
 /** Attach a collector for uncaught page errors. */
-function trackRuntimeErrors(page: import("@playwright/test").Page): string[] {
+function trackRuntimeErrors(page: ErrorEmitter): string[] {
   const errors: string[] = [];
   page.on("pageerror", (err) => errors.push(err.message));
   return errors;
