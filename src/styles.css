@@ -302,6 +302,15 @@
   animation: marquee 40s linear infinite;
 }
 
+/* Indeterminate progress bar (certificate verification skeleton) */
+@keyframes verify-progress {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(420%); }
+}
+.verify-progress-bar {
+  animation: verify-progress 1.1s ease-in-out infinite;
+}
+
 /* ── Blog rich-text content (editor + rendered article) ───────────── */
 .blog-content {
   color: color-mix(in oklab, var(--foreground) 88%, transparent);
