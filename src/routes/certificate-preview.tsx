@@ -9,6 +9,7 @@ import {
   waitForReady, QrTimeoutError,
 } from "@/lib/certificate-export";
 import { toast } from "sonner";
+import { buildVerificationUrl } from "@/lib/verification-url";
 
 export const Route = createFileRoute("/certificate-preview")({
   component: CertificatePreviewStudio,
