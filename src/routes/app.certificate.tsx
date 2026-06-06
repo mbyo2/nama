@@ -12,6 +12,7 @@ import {
   waitForReady, QrTimeoutError,
 } from "@/lib/certificate-export";
 import { toast } from "sonner";
+import { buildVerificationUrl } from "@/lib/verification-url";
 
 export const Route = createFileRoute("/app/certificate")({
   component: CertificatePage,
@@ -79,7 +80,8 @@ function CertificatePage() {
     if (!certificate) return;
     let cancelled = false;
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const url = `${origin}/verify?token=${certificate.verification_token}`;
+    // Always points at /verify with a tamper-detection checksum on the token.
+    const { url } = buildVerificationUrl(origin, certificate.verification_token);
     import("qrcode")
       .then(({ default: QRCode }) =>
         QRCode.toDataURL(url, { margin: 0, width: 240, errorCorrectionLevel: "M" }),

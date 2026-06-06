@@ -9,6 +9,7 @@ import {
   waitForReady, QrTimeoutError,
 } from "@/lib/certificate-export";
 import { toast } from "sonner";
+import { buildVerificationUrl } from "@/lib/verification-url";
 
 export const Route = createFileRoute("/certificate-preview")({
   component: CertificatePreviewStudio,
@@ -54,7 +55,7 @@ function CertificatePreviewStudio() {
   useEffect(() => {
     let cancelled = false;
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const url = `${origin}/verify?token=PREVIEW-SAMPLE-TOKEN`;
+    const { url } = buildVerificationUrl(origin, "preview-sample-token");
     import("qrcode")
       .then(({ default: QRCode }) => QRCode.toDataURL(url, { margin: 0, width: 240, errorCorrectionLevel: "M" }))
       .then((dataUrl) => {
