@@ -126,3 +126,69 @@ test.describe("certificate preview studio", () => {
     expect(tierB).not.toBe(tierA);
   });
 });
+
+test.describe("QR verification auto-load", () => {
+  // A well-formed but (statistically) unknown token: 48 hex chars. Produces a
+  // deterministic "no matching certificate" verdict — perfect for asserting the
+  // page auto-verifies and resolves to an expected result without any click.
+  const UNKNOWN_TOKEN = "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4";
+
+  test("scanning the QR link auto-verifies without clicking Verify", async ({ page }) => {
+    // Build the exact URL the exported certificate's QR encodes (token + checksum).
+    const { url } = buildVerificationUrl("http://localhost", UNKNOWN_TOKEN);
+    const path = url.replace(/^https?:\/\/[^/]+/, "");
+
+    await page.goto(path);
+
+    // The verdict (result OR error) must appear on its own — we never click Verify.
+    const verdict = page.locator('[data-testid="verify-result"], [data-testid="verify-error"]');
+    await expect(verdict.first()).toBeVisible({ timeout: 15_000 });
+
+    // The loading skeleton must NOT still be on screen (never stuck spinning).
+    await expect(page.getByTestId("verify-skeleton")).toHaveCount(0);
+
+    // For an unknown-but-valid token the expected result is a "no match" notice.
+    const errorPanel = page.getByTestId("verify-error");
+    await expect(errorPanel).toBeVisible();
+    await expect(errorPanel).toHaveAttribute("data-error-kind", "notfound");
+  });
+
+  test("auto-verify still resolves after a hard refresh (never stuck)", async ({ page }) => {
+    const { url } = buildVerificationUrl("http://localhost", UNKNOWN_TOKEN);
+    const path = url.replace(/^https?:\/\/[^/]+/, "");
+
+    await page.goto(path, { waitUntil: "networkidle" });
+    await page.reload({ waitUntil: "networkidle" });
+
+    const verdict = page.locator('[data-testid="verify-result"], [data-testid="verify-error"]');
+    await expect(verdict.first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("verify-skeleton")).toHaveCount(0);
+  });
+
+  test("tampered checksum is rejected with a clear message", async ({ page }) => {
+    // Same token, deliberately wrong checksum → integrity failure before any DB hit.
+    await page.goto(`/verify?token=${UNKNOWN_TOKEN}&c=deadbeef`);
+
+    const errorPanel = page.getByTestId("verify-error");
+    await expect(errorPanel).toBeVisible({ timeout: 10_000 });
+    await expect(errorPanel).toHaveAttribute("data-error-kind", "checksum");
+    // A tampered link is not retryable as-is, so no "Try again" button.
+    await expect(page.getByTestId("verify-retry")).toHaveCount(0);
+  });
+
+  test("malformed token shows a format error, not a server error", async ({ page }) => {
+    await page.goto("/verify?token=not-a-valid-token");
+
+    const errorPanel = page.getByTestId("verify-error");
+    await expect(errorPanel).toBeVisible({ timeout: 10_000 });
+    await expect(errorPanel).toHaveAttribute("data-error-kind", "format");
+  });
+
+  test("unknown token offers a retry option", async ({ page }) => {
+    await page.goto(`/verify?token=${UNKNOWN_TOKEN}`);
+    await expect(page.getByTestId("verify-error")).toBeVisible({ timeout: 15_000 });
+    // The not-found case is retryable.
+    await expect(page.getByTestId("verify-retry")).toBeVisible();
+  });
+});
+
