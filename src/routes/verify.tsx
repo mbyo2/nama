@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Search, ShieldCheck, ShieldAlert, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -60,8 +60,22 @@ function VerifyPage() {
     }
   };
 
+  // Auto-verify when arriving from a QR scan / deep link. Runs exactly once as
+  // soon as a token is available, whether it comes from the parsed search params
+  // or (as a fallback) directly from the URL query string.
+  const autoRan = useRef(false);
   useEffect(() => {
-    if (initialToken) runLookup(initialToken);
+    if (autoRan.current) return;
+    let urlToken: string | undefined;
+    if (typeof window !== "undefined") {
+      urlToken = new URLSearchParams(window.location.search).get("token") ?? undefined;
+    }
+    const candidate = (initialToken ?? urlToken ?? "").trim();
+    if (candidate) {
+      autoRan.current = true;
+      setToken(candidate);
+      runLookup(candidate);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialToken]);
 
