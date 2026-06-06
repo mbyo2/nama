@@ -54,7 +54,7 @@ function CertificatePreviewStudio() {
   useEffect(() => {
     let cancelled = false;
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const url = `${origin}/verify?token=PREVIEW-SAMPLE-TOKEN`;
+    const { url } = buildVerificationUrl(origin, "preview-sample-token");
     import("qrcode")
       .then(({ default: QRCode }) => QRCode.toDataURL(url, { margin: 0, width: 240, errorCorrectionLevel: "M" }))
       .then((dataUrl) => {
