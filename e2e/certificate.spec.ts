@@ -1,4 +1,7 @@
 import { test, expect } from "../playwright-fixture";
+import { buildVerificationUrl } from "../src/lib/verification-url";
+
+
 
 /**
  * Every reachable route. Auth-gated routes redirect to /login — that is fine;
